@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release1|Win32">
+      <Configuration>Release1</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release1|x64">
+      <Configuration>Release1</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common\DemoBase.cpp" />
+    <ClCompile Include="Common\TweakBarParameters.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\LoadOGL.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\LoadOGLCore.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwBar.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwColors.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventGLUT.c" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventSDL.c" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventSDL12.c" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventSDL13.c" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventSFML.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwEventWin.c" />
+    <ClCompile Include="extern\AntTweakBar\src\TwFonts.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwMgr.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwOpenGL.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwOpenGLCore.cpp" />
+    <ClCompile Include="extern\AntTweakBar\src\TwPrecomp.cpp" />
+    <ClCompile Include="extern\glew\src\glew.c" />
+    <ClCompile Include="extern\imgui\imgui.cpp" />
+    <ClCompile Include="extern\imgui\imgui_demo.cpp" />
+    <ClCompile Include="extern\imgui\imgui_draw.cpp" />
+    <ClCompile Include="extern\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="extern\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="extern\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="extern\imgui\libs\usynergy\uSynergy.c" />
+    <ClCompile Include="extern\md5\md5.cpp" />
+    <ClCompile Include="PositionBasedDynamics\MathFunctions.cpp" />
+    <ClCompile Include="PositionBasedDynamics\PositionBasedDynamics.cpp" />
+    <ClCompile Include="PositionBasedDynamics\PositionBasedElasticRods.cpp" />
+    <ClCompile Include="PositionBasedDynamics\PositionBasedFluids.cpp" />
+    <ClCompile Include="PositionBasedDynamics\PositionBasedRigidBodyDynamics.cpp" />
+    <ClCompile Include="PositionBasedDynamics\SPHKernels.cpp" />
+    <ClCompile Include="PositionBasedDynamics\TimeIntegration.cpp" />
+    <ClCompile Include="Simulation\BoundingSphereHierarchy.cpp" />
+    <ClCompile Include="Simulation\CollisionDetection.cpp" />
+    <ClCompile Include="Simulation\Constraints.cpp" />
+    <ClCompile Include="Simulation\DistanceFieldCollisionDetection.cpp" />
+    <ClCompile Include="Simulation\IDFactory.cpp" />
+    <ClCompile Include="Simulation\LineModel.cpp" />
+    <ClCompile Include="Simulation\NeighborhoodSearchSpatialHashing.cpp" />
+    <ClCompile Include="Simulation\RigidBodyGeometry.cpp" />
+    <ClCompile Include="Simulation\Simulation.cpp" />
+    <ClCompile Include="Simulation\SimulationModel.cpp" />
+    <ClCompile Include="Simulation\TetModel.cpp" />
+    <ClCompile Include="Simulation\TimeManager.cpp" />
+    <ClCompile Include="Simulation\TimeStep.cpp" />
+    <ClCompile Include="Simulation\TimeStepController.cpp" />
+    <ClCompile Include="Simulation\TriangleModel.cpp" />
+    <ClCompile Include="Main\ClothCollisionDemo.cpp" />
+    <ClCompile Include="Main\TestManager\ImguiManager.cpp" />
+    <ClCompile Include="Main\TestManager\imgui_dock.cpp" />
+    <ClCompile Include="Main\TestManager\implot.cpp" />
+    <ClCompile Include="Main\TestManager\implot_items.cpp" />
+    <ClCompile Include="Utils\IndexedFaceMesh.cpp" />
+    <ClCompile Include="Utils\IndexedTetMesh.cpp" />
+    <ClCompile Include="Utils\SceneLoader.cpp" />
+    <ClCompile Include="Utils\TetGenLoader.cpp" />
+    <ClCompile Include="Utils\VolumeIntegration.cpp" />
+    <ClCompile Include="Visualization\MiniGL.cpp" />
+    <ClCompile Include="Visualization\Shader.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\DemoBase.h" />
+    <ClInclude Include="Common\TweakBarParameters.h" />
+    <ClInclude Include="extern\AntTweakBar\include\AntTweakBar.h" />
+    <ClInclude Include="extern\AntTweakBar\src\AntPerfTimer.h" />
+    <ClInclude Include="extern\AntTweakBar\src\LoadOGL.h" />
+    <ClInclude Include="extern\AntTweakBar\src\LoadOGLCore.h" />
+    <ClInclude Include="extern\AntTweakBar\src\MiniGLFW.h" />
+    <ClInclude Include="extern\AntTweakBar\src\MiniGLUT.h" />
+    <ClInclude Include="extern\AntTweakBar\src\MiniSDL12.h" />
+    <ClInclude Include="extern\AntTweakBar\src\MiniSDL13.h" />
+    <ClInclude Include="extern\AntTweakBar\src\MiniSFML16.h" />
+    <ClInclude Include="extern\AntTweakBar\src\resource.h" />
+    <ClInclude Include="extern\AntTweakBar\src\res\TwXCursors.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwBar.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwColors.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwFonts.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwGraph.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwMgr.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwOpenGL.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwOpenGLCore.h" />
+    <ClInclude Include="extern\AntTweakBar\src\TwPrecomp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Cholesky\LDLT.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Cholesky\LLT.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Cholesky\LLT_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\CholmodSupport\CholmodSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AltiVec\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AltiVec\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AltiVec\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX512\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX512\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\AVX\TypeCasting.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\Half.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\PacketMathHalf.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\CUDA\TypeCasting.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\Default\ConjHelper.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\Default\Settings.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\NEON\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\NEON\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\NEON\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\SSE\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\SSE\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\SSE\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\SSE\TypeCasting.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\ZVector\Complex.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\ZVector\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\arch\ZVector\PacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Array.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ArrayBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ArrayWrapper.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Assign.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\AssignEvaluator.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Assign_MKL.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\BandMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Block.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\BooleanRedux.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CommaInitializer.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ConditionEstimator.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CoreEvaluators.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CoreIterators.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CwiseBinaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CwiseNullaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CwiseTernaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CwiseUnaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\CwiseUnaryView.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\DenseBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\DenseCoeffsBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\DenseStorage.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Diagonal.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\DiagonalMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\DiagonalProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Dot.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\EigenBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ForceAlignedAccess.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\AssignmentFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\BinaryFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\NullaryFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\StlFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\TernaryFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\functors\UnaryFunctors.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Fuzzy.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\GeneralProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\GenericPacketMath.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\GlobalFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Inverse.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\IO.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Map.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\MapBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\MathFunctions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\MathFunctionsImpl.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Matrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\MatrixBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\NestByValue.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\NoAlias.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\NumTraits.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\PermutationMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\PlainObjectBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Product.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ProductEvaluators.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralBlockPanelKernel.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixMatrixTriangular.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixMatrixTriangular_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixMatrix_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\GeneralMatrixVector_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\Parallelizer.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointMatrixMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointMatrixMatrix_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointMatrixVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointMatrixVector_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\SelfadjointRank2Update.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularMatrixMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularMatrixMatrix_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularMatrixVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularMatrixVector_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularSolverMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularSolverMatrix_BLAS.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\products\TriangularSolverVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Random.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Redux.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Ref.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Replicate.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\ReturnByValue.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Reverse.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Select.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\SelfAdjointView.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\SelfCwiseBinaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Solve.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\SolverBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\SolveTriangular.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\StableNorm.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Stride.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Swap.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Transpose.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Transpositions.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\TriangularMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\BlasUtil.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\Constants.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\DisableStupidWarnings.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\ForwardDeclarations.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\Macros.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\Memory.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\Meta.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\MKL_support.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\NonMPL2.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\ReenableStupidWarnings.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\StaticAssert.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\util\XprHelper.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\VectorBlock.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\VectorwiseOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Core\Visitor.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\ComplexEigenSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\ComplexSchur.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\ComplexSchur_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\EigenSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\GeneralizedEigenSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\GeneralizedSelfAdjointEigenSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\HessenbergDecomposition.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\MatrixBaseEigenvalues.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\RealQZ.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\RealSchur.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\RealSchur_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\SelfAdjointEigenSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\SelfAdjointEigenSolver_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Eigenvalues\Tridiagonalization.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\AlignedBox.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\AngleAxis.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\arch\Geometry_SSE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\EulerAngles.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Homogeneous.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Hyperplane.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\OrthoMethods.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\ParametrizedLine.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Quaternion.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Rotation2D.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\RotationBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Scaling.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Transform.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Translation.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Geometry\Umeyama.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Householder\BlockHouseholder.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Householder\Householder.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Householder\HouseholderSequence.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\BasicPreconditioners.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\BiCGSTAB.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\ConjugateGradient.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\IncompleteCholesky.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\IncompleteLUT.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\IterativeSolverBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\LeastSquareConjugateGradient.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\IterativeLinearSolvers\SolveWithGuess.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\Jacobi\Jacobi.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\arch\Inverse_SSE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\Determinant.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\FullPivLU.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\InverseImpl.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\PartialPivLU.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\LU\PartialPivLU_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\MetisSupport\MetisSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\blas.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\Image.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\Kernel.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\lapack.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\lapacke.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\lapacke_mangling.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\misc\RealSvd2x2.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\OrderingMethods\Amd.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\OrderingMethods\Eigen_Colamd.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\OrderingMethods\Ordering.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\PardisoSupport\PardisoSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\PaStiXSupport\PaStiXSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\ArrayCwiseBinaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\ArrayCwiseUnaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\BlockMethods.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\CommonCwiseBinaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\CommonCwiseUnaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\MatrixCwiseBinaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\plugins\MatrixCwiseUnaryOps.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\ColPivHouseholderQR.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\ColPivHouseholderQR_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\CompleteOrthogonalDecomposition.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\FullPivHouseholderQR.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\HouseholderQR.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\QR\HouseholderQR_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCholesky\SimplicialCholesky.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCholesky\SimplicialCholesky_impl.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\AmbiVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\CompressedStorage.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\ConservativeSparseSparseProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\MappedSparseMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseAssign.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseBlock.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseColEtree.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseCompressedBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseCwiseBinaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseCwiseUnaryOp.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseDenseProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseDiagonalProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseDot.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseFuzzy.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseMap.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseMatrixBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparsePermutation.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseProduct.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseRedux.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseRef.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseSelfAdjointView.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseSolverBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseSparseProductWithPruning.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseTranspose.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseTriangularView.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseUtil.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\SparseView.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseCore\TriangularSolver.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLUImpl.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_column_bmod.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_column_dfs.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_copy_to_ucol.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_gemm_kernel.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_heap_relax_snode.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_kernel_bmod.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_Memory.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_panel_bmod.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_panel_dfs.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_pivotL.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_pruneL.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_relax_snode.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_Structs.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_SupernodalMatrix.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseLU\SparseLU_Utils.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SparseQR\SparseQR.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SPQRSupport\SuiteSparseQRSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\StlSupport\details.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\StlSupport\StdDeque.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\StlSupport\StdList.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\StlSupport\StdVector.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SuperLUSupport\SuperLUSupport.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SVD\BDCSVD.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SVD\JacobiSVD.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SVD\JacobiSVD_LAPACKE.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SVD\SVDBase.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\SVD\UpperBidiagonalization.h" />
+    <ClInclude Include="extern\eigen\Eigen\src\UmfPackSupport\UmfPackSupport.h" />
+    <ClInclude Include="extern\freeglut\include\GL\freeglut.h" />
+    <ClInclude Include="extern\freeglut\include\GL\freeglut_ext.h" />
+    <ClInclude Include="extern\freeglut\include\GL\freeglut_std.h" />
+    <ClInclude Include="extern\freeglut\include\GL\glut.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\EnumParameter.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\FunctionParameter.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\NumericParameter.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\Parameter.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\ParameterObject.h" />
+    <ClInclude Include="extern\GenericParameters-master\GenericParameters\VectorParameter.h" />
+    <ClInclude Include="extern\glew\include\GL\glew.h" />
+    <ClInclude Include="extern\glew\include\GL\glxew.h" />
+    <ClInclude Include="extern\glew\include\GL\wglew.h" />
+    <ClInclude Include="extern\GLFW\glfw3.h" />
+    <ClInclude Include="extern\GLFW\glfw3native.h" />
+    <ClInclude Include="extern\imgui\examples\example_allegro5\imconfig_allegro5.h" />
+    <ClInclude Include="extern\imgui\examples\example_apple_metal\Shared\AppDelegate.h" />
+    <ClInclude Include="extern\imgui\examples\example_apple_metal\Shared\Renderer.h" />
+    <ClInclude Include="extern\imgui\examples\example_apple_metal\Shared\ViewController.h" />
+    <ClInclude Include="extern\imgui\imconfig.h" />
+    <ClInclude Include="extern\imgui\imgui.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_allegro5.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_dx10.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_dx9.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_glut.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_marmalade.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_metal.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_opengl2.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_osx.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_sdl.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_vulkan_with_textures.h" />
+    <ClInclude Include="extern\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="extern\imgui\imgui_internal.h" />
+    <ClInclude Include="extern\imgui\imstb_rectpack.h" />
+    <ClInclude Include="extern\imgui\imstb_textedit.h" />
+    <ClInclude Include="extern\imgui\imstb_truetype.h" />
+    <ClInclude Include="extern\imgui\libs\glfw\include\GLFW\glfw3.h" />
+    <ClInclude Include="extern\imgui\libs\glfw\include\GLFW\glfw3native.h" />
+    <ClInclude Include="extern\imgui\libs\usynergy\uSynergy.h" />
+    <ClInclude Include="extern\json\json.hpp" />
+    <ClInclude Include="extern\md5\md5.h" />
+    <ClInclude Include="PositionBasedDynamics\DirectPositionBasedSolverForStiffRodsInterface.h" />
+    <ClInclude Include="PositionBasedDynamics\MathFunctions.h" />
+    <ClInclude Include="PositionBasedDynamics\PositionBasedDynamics.h" />
+    <ClInclude Include="PositionBasedDynamics\PositionBasedElasticRods.h" />
+    <ClInclude Include="PositionBasedDynamics\PositionBasedFluids.h" />
+    <ClInclude Include="PositionBasedDynamics\PositionBasedGenericConstraints.h" />
+    <ClInclude Include="PositionBasedDynamics\PositionBasedRigidBodyDynamics.h" />
+    <ClInclude Include="PositionBasedDynamics\SPHKernels.h" />
+    <ClInclude Include="PositionBasedDynamics\TimeIntegration.h" />
+    <ClInclude Include="Simulation\AABB.h" />
+    <ClInclude Include="Simulation\BoundingSphere.h" />
+    <ClInclude Include="Simulation\BoundingSphereHierarchy.h" />
+    <ClInclude Include="Simulation\CollisionDetection.h" />
+    <ClInclude Include="Simulation\Constraints.h" />
+    <ClInclude Include="Simulation\DistanceFieldCollisionDetection.h" />
+    <ClInclude Include="Simulation\IDFactory.h" />
+    <ClInclude Include="Simulation\kdTree.h" />
+    <ClInclude Include="Simulation\LineModel.h" />
+    <ClInclude Include="Simulation\NeighborhoodSearchSpatialHashing.h" />
+    <ClInclude Include="Simulation\ParticleData.h" />
+    <ClInclude Include="Simulation\RigidBody.h" />
+    <ClInclude Include="Simulation\RigidBodyGeometry.h" />
+    <ClInclude Include="Simulation\Simulation.h" />
+    <ClInclude Include="Simulation\SimulationModel.h" />
+    <ClInclude Include="Simulation\TetModel.h" />
+    <ClInclude Include="Simulation\TimeManager.h" />
+    <ClInclude Include="Simulation\TimeStep.h" />
+    <ClInclude Include="Simulation\TimeStepController.h" />
+    <ClInclude Include="Simulation\TriangleModel.h" />
+    <ClInclude Include="Common\Common.h" />
+    <ClInclude Include="Main\TestManager\imfilebrowser.h" />
+    <ClInclude Include="Main\TestManager\ImguiManager.h" />
+    <ClInclude Include="Main\TestManager\imgui_dock.h" />
+    <ClInclude Include="Main\TestManager\implot.h" />
+    <ClInclude Include="Main\TestManager\implot_demo.h" />
+    <ClInclude Include="Main\TestManager\implot_internal.h" />
+    <ClInclude Include="Utils\FileSystem.h" />
+    <ClInclude Include="Utils\Hashmap.h" />
+    <ClInclude Include="Utils\IndexedFaceMesh.h" />
+    <ClInclude Include="Utils\IndexedTetMesh.h" />
+    <ClInclude Include="Utils\Logger.h" />
+    <ClInclude Include="Utils\ObjectArray.h" />
+    <ClInclude Include="Utils\OBJLoader.h" />
+    <ClInclude Include="Utils\SceneLoader.h" />
+    <ClInclude Include="Utils\StringTools.h" />
+    <ClInclude Include="Utils\SystemInfo.h" />
+    <ClInclude Include="Utils\TetGenLoader.h" />
+    <ClInclude Include="Utils\Timing.h" />
+    <ClInclude Include="Utils\Version.h" />
+    <ClInclude Include="Utils\VolumeIntegration.h" />
+    <ClInclude Include="Visualization\MiniGL.h" />
+    <ClInclude Include="Visualization\Selection.h" />
+    <ClInclude Include="Visualization\Shader.h" />
+    <ClInclude Include="Visualization\Visualization.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="extern\imgui\examples\example_emscripten\shell_minimal.html" />
+    <None Include="Simulation\kdTree.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\freeglut.lib" />
+    <Library Include="lib\glew.lib" />
+    <Library Include="lib\glfw3.lib" />
+    <Library Include="lib\imgui.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="extern\AntTweakBar\src\AntTweakBar.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{e42f0a8a-10fe-41dd-a186-c2e3a4629f6f}</ProjectGuid>
+    <RootNamespace>CDProject</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release1|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <IncludePath>$(MSBuildProjectDirectory)\extern\glew\include;$(MSBuildProjectDirectory)\extern\imgui\libs\glfw\include;$(MSBuildProjectDirectory)\extern\imgui;$(MSBuildProjectDirectory)\extern\GenericParameters-master\GenericParameters;$(MSBuildProjectDirectory)\extern\freeglut\include;$(MSBuildProjectDirectory)\extern\eigen;$(MSBuildProjectDirectory);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <IncludePath>$(MSBuildProjectDirectory)\extern\glew\include;$(MSBuildProjectDirectory)\extern\imgui\libs\glfw\include;$(MSBuildProjectDirectory)\extern\imgui;$(MSBuildProjectDirectory)\extern\GenericParameters-master\GenericParameters;$(MSBuildProjectDirectory)\extern\freeglut\include;$(MSBuildProjectDirectory)\extern\eigen;$(MSBuildProjectDirectory);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(MSBuildProjectDirectory)\extern\md5;$(MSBuildProjectDirectory)\extern\AntTweakBar\include;$(MSBuildProjectDirectory)\extern\glew\include;$(MSBuildProjectDirectory)\extern;$(MSBuildProjectDirectory)\extern\imgui;$(MSBuildProjectDirectory)\extern\GenericParameters-master\GenericParameters;$(MSBuildProjectDirectory)\extern\freeglut\include;$(MSBuildProjectDirectory)\extern\eigen;$(MSBuildProjectDirectory);$(IncludePath)$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(MSBuildProjectDirectory)\extern\md5;$(MSBuildProjectDirectory)\extern\AntTweakBar\include;$(MSBuildProjectDirectory)\extern\glew\include;$(MSBuildProjectDirectory)\extern;$(MSBuildProjectDirectory)\extern\imgui;$(MSBuildProjectDirectory)\extern\GenericParameters-master\GenericParameters;$(MSBuildProjectDirectory)\extern\freeglut\include;$(MSBuildProjectDirectory)\extern\eigen;$(MSBuildProjectDirectory);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)CDProject\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;glew.lib;AntTweakBar.lib;AntTweakBar_d.lib;glew_d.lib;MD5_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release1|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)CDProject\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;glew.lib;AntTweakBar.lib;AntTweakBar_d.lib;glew_d.lib;MD5_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release1|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>GLFW_CDECL=1;_HAS_AUTO_PTR_ETC=1;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)CDProject\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
