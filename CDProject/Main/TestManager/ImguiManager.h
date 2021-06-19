@@ -25,6 +25,7 @@
 #include "Simulation/SimulationModel.h"
 #include "Utils/FileSystem.h"
 #include "Simulation/Simulation.h"
+#include "Simulation/DistanceFieldCollisionDetection.h"
 
 #define BIT(x) (1 << x)
 #define PI std::atan(1.0)*4

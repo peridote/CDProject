@@ -281,7 +281,11 @@ void ImguiManager::createLeftSideMenu()
 
 					if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
 						
-						rb[n]->getGeometry().updateMeshTransformation(Vector3r(rb_trans_x, rb_trans_y, rb_trans_z), rb[n]->getRotationMatrix() );
+						Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
+						rb[n]->getLastPosition() = trans_pos;
+						rb[n]->getOldPosition() = trans_pos;
+						rb[n]->getPosition() = trans_pos;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_trans_x = rb_trans_x;
 						prev_rb_trans_y = rb_trans_y;
@@ -297,7 +301,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = 0;
 						rb_rot_z = 0;
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
@@ -311,7 +319,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = sin(rb_rot_y / 2);
 						rb_rot_z = 0;
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
 						prev_rb_rot_y = rb_rot_y;
@@ -324,7 +336,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = 0;
 						rb_rot_z = sin(rb_rot_z / 2);
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
@@ -553,13 +569,19 @@ void ImguiManager::addRigidbody(std::string fName)
 	PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
 	PBD::RigidBody* n_rigidbody = new PBD::RigidBody();
-	n_rigidbody->initBody(1.0,
+	n_rigidbody->initBody(100.0,
 		Vector3r(0.0, 5.5, 0.0),
 		Quaternionr(1.0, 0.0, 0.0, 0.0),
 		vd, mesh,
 		Vector3r(5.0, 5.0, 5.0));
 	n_rigidbody->setMass(1.0);
 	rb.push_back(n_rigidbody);
+
+	const std::vector<Vector3r>* vertices = rb.back()->getGeometry().getVertexDataLocal().getVertices();
+	const unsigned int nVert = static_cast<unsigned int>(vertices->size());
+	PBD::DistanceFieldCollisionDetection &cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	cd.addCollisionBox(rb.size()-1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(5.0, 5.0, 5.0));
+
 }
 
 void ImguiManager::ItemRowsBackground(float lineHeight, const ImColor& color)

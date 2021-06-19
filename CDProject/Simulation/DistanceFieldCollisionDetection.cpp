@@ -494,6 +494,7 @@ void DistanceFieldCollisionDetection::addCollisionBox(const unsigned int bodyInd
 	if (invertSDF)
 		cf->m_invertSDF = -1.0;
 	m_collisionObjects.push_back(cf);
+	printf("num addCollisionBox: %d\n", m_collisionObjects.size());
 }
 
 void DistanceFieldCollisionDetection::addCollisionSphere(const unsigned int bodyIndex, const unsigned int bodyType, const Vector3r *vertices, const unsigned int numVertices, const Real radius, const bool testMesh, const bool invertSDF)
@@ -522,6 +523,8 @@ void DistanceFieldCollisionDetection::addCollisionTorus(const unsigned int bodyI
 	if (invertSDF)
 		ct->m_invertSDF = -1.0;
 	m_collisionObjects.push_back(ct);
+
+	printf("num addCollisionTorus: %d\n", m_collisionObjects.size());
 }
 
 void DistanceFieldCollisionDetection::addCollisionCylinder(const unsigned int bodyIndex, const unsigned int bodyType, const Vector3r *vertices, const unsigned int numVertices, const Vector2r &dim, const bool testMesh, const bool invertSDF)
@@ -581,6 +584,9 @@ void DistanceFieldCollisionDetection::addCollisionObjectWithoutGeometry(const un
 	co->m_testMesh = testMesh;
 	co->m_invertSDF = 1.0;
 	m_collisionObjects.push_back(co);
+
+
+	printf("num addCollisionObjectWithoutGeometry: %d\n", m_collisionObjects.size());
 }
 
 double DistanceFieldCollisionDetection::DistanceFieldCollisionBox::distance(const Eigen::Vector3d &x, const Real tolerance)

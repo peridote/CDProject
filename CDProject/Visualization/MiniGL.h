@@ -156,6 +156,7 @@ namespace PBD
 		static void bindTexture();
 		static void unbindTexture();
 		static void move(Real x, Real y, Real z);
+		static void rotateZ(Real z);
 		static void rotateX(Real x);
 		static void rotateY(Real y);
 		static void setProjectionMatrix(int width, int height);

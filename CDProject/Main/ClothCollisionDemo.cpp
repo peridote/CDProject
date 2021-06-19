@@ -128,6 +128,7 @@ int main(int argc, char** argv)
 		static float rot_z = 0.0f;
 		static float prev_rot_x = 0.0f;
 		static float prev_rot_y = 0.0f;
+		static float prev_rot_z = 0.0f;
 
 		static int onOff = 0;
 		ImGui::Begin("Controller");
@@ -151,21 +152,20 @@ int main(int argc, char** argv)
 		MiniGL::m_translation.z() = -(Real)trans_z;
 
 		//ImGui::SliderFloat("rot_w", &rot_w, 0.0f, 1.0f);
-		ImGui::SliderFloat("rot_x", &rot_x, 0.0f, 1.0f);
-		ImGui::SliderFloat("rot_y", &rot_y, 0.0f, 1.0f);
+		ImGui::SliderFloat("rot_x", &rot_x, 0.0f, 360.0f);
+		ImGui::SliderFloat("rot_y", &rot_y, 0.0f, 360.0f);
+		ImGui::SliderFloat("rot_z", &rot_z, 0.0f, 360.0f);
 		if (rot_x != prev_rot_x) {
-			if (rot_x < prev_rot_x)
-				MiniGL::rotateX(-rot_x / static_cast<Real>(10.0));
-			else
-				MiniGL::rotateX(rot_x / static_cast<Real>(10.0));
+			MiniGL::rotateX(2 * PI * (rot_x - prev_rot_x) / static_cast<Real>(360.0));
 			prev_rot_x = rot_x;
 		}
 		if (rot_y != prev_rot_y) {
-			if (rot_y < prev_rot_y)
-				MiniGL::rotateY(-rot_y / static_cast<Real>(10.0));
-			else
-				MiniGL::rotateY(rot_y / static_cast<Real>(10.0));
+			MiniGL::rotateY(2 * PI * (rot_y - prev_rot_y) / static_cast<Real>(360.0));
 			prev_rot_y = rot_y;
+		}
+		if (rot_z != prev_rot_z) {
+			MiniGL::rotateZ(2 * PI * (rot_z - prev_rot_z) / static_cast<Real>(360.0));
+			prev_rot_z = rot_z;
 		}
 
 		ImGui::End();
@@ -482,6 +482,7 @@ void buildModel()
 	rb[1]->setFrictionCoeff(static_cast<Real>(0.1));
 
 	Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
+	
 	cd.setTolerance(static_cast<Real>(0.05));
 
 	const std::vector<Vector3r>* vertices1 = rb[0]->getGeometry().getVertexDataLocal().getVertices();
