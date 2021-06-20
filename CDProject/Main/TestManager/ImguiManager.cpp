@@ -16,6 +16,7 @@ ImguiManager::ImguiManager()
 	m_filetreeitem_current_idx = 0;
 	m_filetree_double_clicked_item = "";
 	m_filetreeitems = {"(1)torus.obj"};
+	m_filetree_num = 2; // cloth collision demo 에 이미 2개 생성 되있음
 
 	translation = Eigen::Vector3f(0, 0, 0);
 }
@@ -151,6 +152,13 @@ void ImguiManager::Cleanup()
 }
 
 
+void ImguiManager::reset()
+{
+	m_filetreeitems.clear();
+	m_filetreeitems.push_back("(1)torus.obj"); // 현재 collision demo 기본 obj가 tours라서 넣어줌...
+	m_filetree_num = 2;
+}
+
 void ImguiManager::createMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
@@ -182,11 +190,10 @@ void ImguiManager::createLeftSideMenu()
 			//ImGui::SetWindowPos(ImVec2(0, 20));
 			//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
 
-			static int i = 2; // cloth collision demo 에 이미 2개 생성 되있음
 			if (m_filetree_double_clicked_item != "")
 			{
-				m_filetree_double_clicked_item = "(" + std::to_string(i) + ")" + m_filetree_double_clicked_item;
-				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, i++));
+				m_filetree_double_clicked_item = "(" + std::to_string(m_filetree_num) + ")" + m_filetree_double_clicked_item;
+				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, m_filetree_num++));
 				m_filetreeitems.push_back(m_filetree_double_clicked_item);
 				std::cout << m_filetree_double_clicked_item << std::endl;
 				m_filetree_double_clicked_item = "";
@@ -265,6 +272,7 @@ void ImguiManager::createLeftSideMenu()
 					static float prev_rb_rot_x = 0.0f;
 					static float prev_rb_rot_y = 0.0f;
 					static float prev_rb_rot_z = 0.0f;
+
 
 					ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
 					ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
@@ -535,9 +543,9 @@ void ImguiManager::createFileDialogBtn()
 
 	if (m_fileDialog.HasSelected())
 	{
-		std::cout << "Selected filename" << m_fileDialog.GetSelected().string() << std::endl;
+		std::cout << "Selected filename: " << m_fileDialog.GetSelected().string() << std::endl;
 		m_dirPath = m_fileDialog.GetPwd().string();
-		std::cout << "Selected filepath" << m_dirPath << std::endl;
+		std::cout << "Selected filepath: " << m_dirPath << std::endl;
 
 		std::string selected = m_fileDialog.GetSelected().string();
 		const size_t last_slash_idx = selected.find_last_of("\\/");

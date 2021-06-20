@@ -31,6 +31,8 @@ void timeStep();
 void buildModel();
 void createMesh();
 void render();
+void restart();
+void reset(ImguiManager* im);
 void reset();
 void initParameters();
 void exportMeshOBJ();
@@ -139,9 +141,13 @@ int main(int argc, char** argv)
 			base->m_doPause = false;
 		ImGui::Checkbox("exportObj", &enableExportOBJ);
 
+		if (ImGui::Button("Restart"))
+		{
+			restart();
+		}
 		if (ImGui::Button("Reset"))
 		{
-			reset();
+			reset(im);
 		}
 
 		ImGui::SliderFloat("trans_x", &trans_x, -50.0f, 50.0f);
@@ -351,6 +357,44 @@ void initParameters()
 	TweakBarParameters::createParameterObjectGUI(Simulation::getCurrent());
 	TweakBarParameters::createParameterObjectGUI(Simulation::getCurrent()->getModel());
 	TweakBarParameters::createParameterObjectGUI(Simulation::getCurrent()->getTimeStep());
+}
+
+void restart()
+{
+	Utilities::Timing::printAverageTimes();
+	Utilities::Timing::reset();
+
+	Simulation::getCurrent()->reset();
+
+	//base->getSelectedParticles().clear();
+
+	//SimulationModel* model = Simulation::getCurrent()->getModel();
+	//SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+	//for (unsigned int i = 0; i < rb.size(); i++)
+	//{
+	//	rb[i]->reset();
+	//	rb[i]->getGeometry().updateMeshTransformation(rb[i]->getPosition(), rb[i]->getRotationMatrix());
+	//}
+
+	//SimulationModel::ConstraintVector m_constraints = model->getConstraints();
+	//for (unsigned int i = 0; i < m_constraints.size(); i++)
+	//	m_constraints[i]->updateConstraint(*model);
+}
+
+void reset(ImguiManager* im)
+{
+	Utilities::Timing::printAverageTimes();
+	Utilities::Timing::reset();
+
+	Simulation::getCurrent()->reset();
+	base->getSelectedParticles().clear();
+
+	Simulation::getCurrent()->getModel()->cleanup();
+	Simulation::getCurrent()->getTimeStep()->getCollisionDetection()->cleanup();
+
+	buildModel();
+
+	im->reset();
 }
 
 void reset()
