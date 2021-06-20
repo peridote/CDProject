@@ -16,6 +16,7 @@ ImguiManager::ImguiManager()
 	m_filetreeitem_current_idx = 0;
 	m_filetree_double_clicked_item = "";
 	m_filetreeitems = {"(1)torus.obj"};
+	m_filetree_num = 2; // cloth collision demo 에 이미 2개 생성 되있음
 
 	translation = Eigen::Vector3f(0, 0, 0);
 }
@@ -151,6 +152,13 @@ void ImguiManager::Cleanup()
 }
 
 
+void ImguiManager::reset()
+{
+	m_filetreeitems.clear();
+	m_filetreeitems.push_back("(1)torus.obj"); // 현재 collision demo 기본 obj가 tours라서 넣어줌...
+	m_filetree_num = 2;
+}
+
 void ImguiManager::createMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
@@ -182,11 +190,10 @@ void ImguiManager::createLeftSideMenu()
 			//ImGui::SetWindowPos(ImVec2(0, 20));
 			//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
 
-			static int i = 2; // cloth collision demo 에 이미 2개 생성 되있음
 			if (m_filetree_double_clicked_item != "")
 			{
-				m_filetree_double_clicked_item = "(" + std::to_string(i) + ")" + m_filetree_double_clicked_item;
-				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, i++));
+				m_filetree_double_clicked_item = "(" + std::to_string(m_filetree_num) + ")" + m_filetree_double_clicked_item;
+				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, m_filetree_num++));
 				m_filetreeitems.push_back(m_filetree_double_clicked_item);
 				std::cout << m_filetree_double_clicked_item << std::endl;
 				m_filetree_double_clicked_item = "";
@@ -266,6 +273,7 @@ void ImguiManager::createLeftSideMenu()
 					static float prev_rb_rot_y = 0.0f;
 					static float prev_rb_rot_z = 0.0f;
 
+
 					ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
 					ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
 					ImGui::SliderFloat("rb_trans_z", &rb_trans_z, -5.0f, 5.0f);
@@ -281,7 +289,11 @@ void ImguiManager::createLeftSideMenu()
 
 					if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
 						
-						rb[n]->getGeometry().updateMeshTransformation(Vector3r(rb_trans_x, rb_trans_y, rb_trans_z), rb[n]->getRotationMatrix() );
+						Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
+						rb[n]->getLastPosition() = trans_pos;
+						rb[n]->getOldPosition() = trans_pos;
+						rb[n]->getPosition() = trans_pos;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_trans_x = rb_trans_x;
 						prev_rb_trans_y = rb_trans_y;
@@ -297,7 +309,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = 0;
 						rb_rot_z = 0;
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
@@ -311,7 +327,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = sin(rb_rot_y / 2);
 						rb_rot_z = 0;
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
 						prev_rb_rot_y = rb_rot_y;
@@ -324,7 +344,11 @@ void ImguiManager::createLeftSideMenu()
 						rb_rot_y = 0;
 						rb_rot_z = sin(rb_rot_z / 2);
 
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
 						prev_rb_rot_w = rb_rot_w;
 						prev_rb_rot_x = rb_rot_x;
@@ -519,9 +543,9 @@ void ImguiManager::createFileDialogBtn()
 
 	if (m_fileDialog.HasSelected())
 	{
-		std::cout << "Selected filename" << m_fileDialog.GetSelected().string() << std::endl;
+		std::cout << "Selected filename: " << m_fileDialog.GetSelected().string() << std::endl;
 		m_dirPath = m_fileDialog.GetPwd().string();
-		std::cout << "Selected filepath" << m_dirPath << std::endl;
+		std::cout << "Selected filepath: " << m_dirPath << std::endl;
 
 		std::string selected = m_fileDialog.GetSelected().string();
 		const size_t last_slash_idx = selected.find_last_of("\\/");
@@ -553,13 +577,19 @@ void ImguiManager::addRigidbody(std::string fName)
 	PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
 	PBD::RigidBody* n_rigidbody = new PBD::RigidBody();
-	n_rigidbody->initBody(1.0,
+	n_rigidbody->initBody(100.0,
 		Vector3r(0.0, 5.5, 0.0),
 		Quaternionr(1.0, 0.0, 0.0, 0.0),
 		vd, mesh,
 		Vector3r(5.0, 5.0, 5.0));
 	n_rigidbody->setMass(1.0);
 	rb.push_back(n_rigidbody);
+
+	const std::vector<Vector3r>* vertices = rb.back()->getGeometry().getVertexDataLocal().getVertices();
+	const unsigned int nVert = static_cast<unsigned int>(vertices->size());
+	PBD::DistanceFieldCollisionDetection &cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	cd.addCollisionBox(rb.size()-1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(5.0, 5.0, 5.0));
+
 }
 
 void ImguiManager::ItemRowsBackground(float lineHeight, const ImColor& color)

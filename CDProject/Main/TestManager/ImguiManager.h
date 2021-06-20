@@ -25,6 +25,7 @@
 #include "Simulation/SimulationModel.h"
 #include "Utils/FileSystem.h"
 #include "Simulation/Simulation.h"
+#include "Simulation/DistanceFieldCollisionDetection.h"
 
 #define BIT(x) (1 << x)
 #define PI std::atan(1.0)*4
@@ -46,6 +47,7 @@ public:
 	std::string m_filetree_current_item;
 	std::string m_filetree_double_clicked_item;
 	std::vector<std::string> m_filetreeitems;
+	unsigned int m_filetree_num;
 
 	unsigned int m_fbo_texture;
 	unsigned int m_fbo_depth;
@@ -110,6 +112,9 @@ public:
 	void showDirectoryTree(std::string directoryPath);
 	void loadObj(const std::string& filename, PBD::VertexData& vd, Utilities::IndexedFaceMesh& mesh, const Vector3r& scale);
 	void addRigidbody(std::string fName);
+	
+	// reset 버튼 누를시 호출
+	void reset(); 
 
 	void createMainMenuBar();
 	void createLeftSideMenu();

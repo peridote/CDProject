@@ -891,6 +891,13 @@ void MiniGL::move(Real x, Real y, Real z)
 	m_translation[2] += z;
 }
 
+void MiniGL::rotateZ(Real z)
+{
+	AngleAxisr angleAxis(z, Vector3r(0, 0, 1));
+	Quaternionr quat(angleAxis);
+	m_rotation = m_rotation * quat;
+}
+
 void MiniGL::rotateY(Real y)
 {
 	AngleAxisr angleAxis(y, Vector3r(0, 1, 0));
