@@ -9,6 +9,8 @@ using namespace std;
 using namespace GenParam;
 
 Simulation* Simulation::current = nullptr;
+Simulation* Simulation::m_simul1 = nullptr;
+Simulation* Simulation::m_simul2 = nullptr;
 int Simulation::GRAVITATION = -1;
 int Simulation::SIMULATION_METHOD = -1;
 int Simulation::ENUM_SIMULATION_PBD = -1;
@@ -30,16 +32,35 @@ Simulation::~Simulation ()
 	delete TimeManager::getCurrent();
 
 	current = nullptr;
+	m_simul1 = nullptr;
+	m_simul2 = nullptr;
 }
 
-Simulation* Simulation::getCurrent ()
+Simulation* Simulation::getCurrent()
 {
+	if (m_simul1 == nullptr)
+	{
+		m_simul1 = new Simulation();
+		m_simul1->init();
+	}
+	if (m_simul2 == nullptr)
+	{
+		m_simul2 = new Simulation();
+		m_simul2->init();
+	}
 	if (current == nullptr)
 	{
-		current = new Simulation ();
-		current->init();
+		current = m_simul1;
 	}
 	return current;
+}
+
+void Simulation::switchCurrent()
+{
+	if (current != m_simul1)
+		current = m_simul1;
+	else
+		current = m_simul2;
 }
 
 void Simulation::setCurrent (Simulation* tm)

@@ -52,6 +52,9 @@ public:
 	unsigned int m_fbo_texture;
 	unsigned int m_fbo_depth;
 	unsigned int m_fbo;
+	unsigned int m_fbo_texture2;
+	unsigned int m_fbo_depth2;
+	unsigned int m_fbo2;
 	GLuint m_shaderProgram;
 
 	std::map<std::string, int> m_map_filetree_rigidbody;
@@ -125,8 +128,9 @@ public:
 	
 
 	void fbo_init();
-	void fbo_bind();
-	void fbo_unbind();
+	void fbo2_init();
+	void fbo_bind(unsigned int n);
+	void fbo_unbind(unsigned int n);
 	void fbo_cleanup();
 	void draw();
 };
