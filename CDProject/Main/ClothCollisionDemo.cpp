@@ -103,7 +103,6 @@ int main(int argc, char** argv)
 
 	ImguiManager* im = new ImguiManager();
 	im->Initialize(base->getWindow());
-
 	im->fbo_init(); // m_fbo_texture
 	im->fbo2_init(); // m_fbo_texture2
 
@@ -119,7 +118,7 @@ int main(int argc, char** argv)
 			im->StartFrame();
 			im->createMainMenuBar();
 			im->createLeftSideMenu();
-			//im->createRightSideMenu();
+			im->createRightSideMenu();
 			//im->createCenterMenu();
 			im->createBottomMenu();
 		}
@@ -151,6 +150,8 @@ int main(int argc, char** argv)
 
 		static int onOff = 0;
 		ImGui::Begin("Controller");
+		ImGui::SetWindowPos(ImVec2(130 + 2 * im->m_w / 2.5, 20));
+		ImGui::SetWindowSize(ImVec2(254, 467));
 		ImGui::SliderInt("on/off", &onOff, 0, 1);
 		if (onOff == 0)
 			base->m_doPause = true;
@@ -199,148 +200,133 @@ int main(int argc, char** argv)
 
 		ImGui::End();
 
-
 		if (ImGui::Begin("Scene1"))
 		{
-			// dock layout by hard-coded or .ini file
-
-			ImGui::BeginDockspace();
-
-			if (ImGui::BeginDock("Scene_1")) {
-
-				ImVec2 wsize = ImGui::GetWindowSize();
-				MiniGL::width = im->m_w;
-				MiniGL::height = im->m_h;
-				ImGui::Image((void*)(intptr_t)im->m_fbo_texture, ImVec2(wsize.x, wsize.y), ImVec2(0, 1), ImVec2(1, 0));
-
-			}
-			ImGui::EndDock();
-
-			if (ImGui::BeginDock("Scene_1_graph")) {
-				float x_data[1000] = { 1, 2, 3, 4, 5 };
-				float y_data[1000] = { 1, 1, 1, 1, 1 };
-
-
-				//ImGui::BulletText("Move your mouse to change the data!");
-				ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
-				static ImguiManager::ScrollingBuffer sdata1, sdata2;
-				static ImguiManager::RollingBuffer   rdata1, rdata2;
-				ImVec2 mouse = ImGui::GetMousePos();
-				static float t = 0;
-				if (onOff) {
-					t += ImGui::GetIO().DeltaTime;
-
-					sdata1.AddPoint(t, 1 / 100);
-					rdata1.AddPoint(t, 1 / 100);
-					sdata2.AddPoint(t, 1 / 100);
-					rdata2.AddPoint(t, 1 / 100);
-
-				}
-				else {
-					sdata1.AddPoint(t, 0);
-					rdata1.AddPoint(t, 0);
-					sdata2.AddPoint(t, 0);
-					rdata2.AddPoint(t, 0);
-				}
-				static float history = 10.0f;
-				ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
-				rdata1.Span = history;
-				rdata2.Span = history;
-
-				static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
-				ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
-				ImPlot::SetNextPlotLimitsY(0, 1);
-
-				if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
-					ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-					ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
-					//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
-					ImPlot::EndPlot();
-				}
-				ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
-				ImPlot::SetNextPlotLimitsY(0, 1);
-				if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1, 150), 0, flags, flags)) {
-					ImPlot::PlotLine("Relative Error", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
-					//ImPlot::PlotLine("Mouse Y", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 2 * sizeof(float));
-					ImPlot::EndPlot();
-				}
-
-
-			}
-			ImGui::EndDock();
-
-			ImGui::EndDockspace();
+			ImGui::SetWindowPos(ImVec2(130, 20));
+			ImGui::SetWindowSize(ImVec2(im->m_w/2.5, im->m_h/2.5 + 35));
+			ImVec2 wsize = ImGui::GetWindowSize();
+			MiniGL::width = im->m_w;
+			MiniGL::height = im->m_h;
+			ImGui::Image((void*)(intptr_t)im->m_fbo_texture, ImVec2(wsize.x, wsize.y - 35), ImVec2(0, 1), ImVec2(1, 0));
 		}
+		ImGui::End();
+
+		if (ImGui::Begin("Scene_1_graph"))
+		{
+			ImGui::SetWindowPos(ImVec2(130, im->m_h / 2.5 + 55));
+			ImGui::SetWindowSize(ImVec2(im->m_w / 2.5, 220));
+			float x_data[1000] = { 1, 2, 3, 4, 5 };
+			float y_data[1000] = { 1, 1, 1, 1, 1 };
+
+
+			//ImGui::BulletText("Move your mouse to change the data!");
+			ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
+			static ImguiManager::ScrollingBuffer sdata1, sdata2;
+			static ImguiManager::RollingBuffer   rdata1, rdata2;
+			ImVec2 mouse = ImGui::GetMousePos();
+			static float t = 0;
+			if (onOff) {
+				t += ImGui::GetIO().DeltaTime;
+
+				sdata1.AddPoint(t, 1 / 100);
+				rdata1.AddPoint(t, 1 / 100);
+				sdata2.AddPoint(t, 1 / 100);
+				rdata2.AddPoint(t, 1 / 100);
+
+			}
+			else {
+				sdata1.AddPoint(t, 0);
+				rdata1.AddPoint(t, 0);
+				sdata2.AddPoint(t, 0);
+				rdata2.AddPoint(t, 0);
+			}
+			static float history = 10.0f;
+			ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
+			rdata1.Span = history;
+			rdata2.Span = history;
+
+			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+			ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
+			ImPlot::SetNextPlotLimitsY(0, 1);
+
+			if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
+				ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
+				ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
+				//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
+				ImPlot::EndPlot();
+			}
+			ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
+			ImPlot::SetNextPlotLimitsY(0, 1);
+			if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1, 150), 0, flags, flags)) {
+				ImPlot::PlotLine("Relative Error", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
+				//ImPlot::PlotLine("Mouse Y", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 2 * sizeof(float));
+				ImPlot::EndPlot();
+			}
+		}
+		ImGui::End();
 
 		if (ImGui::Begin("Scene2"))
 		{
-			// dock layout by hard-coded or .ini file
-			ImGui::BeginDockspace();
+			ImGui::SetWindowPos(ImVec2(130 + im->m_w / 2.5, 20));
+			ImGui::SetWindowSize(ImVec2(im->m_w/2.5, im->m_h/2.5 + 35));
+			ImVec2 wsize2 = ImGui::GetWindowSize();
+			MiniGL::width = im->m_w;
+			MiniGL::height = im->m_h;
+			ImGui::Image((void*)(intptr_t)im->m_fbo_texture2, ImVec2(wsize2.x, wsize2.y - 35), ImVec2(0, 1), ImVec2(1, 0));
+		}
+		ImGui::End();
 
-			if (ImGui::BeginDock("Scene_2")) {
+		if (ImGui::Begin("Scene_2_graph"))
+		{
+			ImGui::SetWindowPos(ImVec2(130 + im->m_w / 2.5, im->m_h / 2.5 + 55));
+			ImGui::SetWindowSize(ImVec2(im->m_w / 2.5, 220));
+			float x_data2[1000] = { 1, 2, 3, 4, 5 };
+			float y_data2[1000] = { 1, 1, 1, 1, 1 };
 
-				ImVec2 wsize2 = ImGui::GetWindowSize();
-				MiniGL::width = im->m_w;
-				MiniGL::height = im->m_h;
-				ImGui::Image((void*)(intptr_t)im->m_fbo_texture2, ImVec2(wsize2.x, wsize2.y), ImVec2(0, 1), ImVec2(1, 0));
 
+			//ImGui::BulletText("Move your mouse to change the data!");
+			ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
+			static ImguiManager::ScrollingBuffer sdata1, sdata2;
+			static ImguiManager::RollingBuffer   rdata1, rdata2;
+			ImVec2 mouse = ImGui::GetMousePos();
+			static float t = 0;
+			if (onOff) {
+				t += ImGui::GetIO().DeltaTime;
+
+				sdata1.AddPoint(t, 1 / 100);
+				rdata1.AddPoint(t, 1 / 100);
+				sdata2.AddPoint(t, 1 / 100);
+				rdata2.AddPoint(t, 1 / 100);
 			}
-			ImGui::EndDock();
-
-			if (ImGui::BeginDock("Scene_2_graph")) {
-				float x_data2[1000] = { 1, 2, 3, 4, 5 };
-				float y_data2[1000] = { 1, 1, 1, 1, 1 };
-
-
-				//ImGui::BulletText("Move your mouse to change the data!");
-				ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
-				static ImguiManager::ScrollingBuffer sdata1, sdata2;
-				static ImguiManager::RollingBuffer   rdata1, rdata2;
-				ImVec2 mouse = ImGui::GetMousePos();
-				static float t = 0;
-				if (onOff) {
-					t += ImGui::GetIO().DeltaTime;
-
-					sdata1.AddPoint(t, 1 / 100);
-					rdata1.AddPoint(t, 1 / 100);
-					sdata2.AddPoint(t, 1 / 100);
-					rdata2.AddPoint(t, 1 / 100);
-				}
-				else {
-					sdata1.AddPoint(t, 0);
-					rdata1.AddPoint(t, 0);
-					sdata2.AddPoint(t, 0);
-					rdata2.AddPoint(t, 0);
-				}
-				static float history = 10.0f;
-				ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
-				rdata1.Span = history;
-				rdata2.Span = history;
-
-
-				static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
-				ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
-				ImPlot::SetNextPlotLimitsY(0, 1);
-
-				if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
-					ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-					ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
-					//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
-					ImPlot::EndPlot();
-				}
-				ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
-				ImPlot::SetNextPlotLimitsY(0, 1);
-				if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1, 150), 0, flags, flags)) {
-					ImPlot::PlotLine("Relative Error", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
-					//ImPlot::PlotLine("Mouse Y", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 2 * sizeof(float));
-					ImPlot::EndPlot();
-				}
-
-
+			else {
+				sdata1.AddPoint(t, 0);
+				rdata1.AddPoint(t, 0);
+				sdata2.AddPoint(t, 0);
+				rdata2.AddPoint(t, 0);
 			}
-			ImGui::EndDock();
+			static float history = 10.0f;
+			ImGui::SliderFloat("History", &history, 1, 30, "%.1f s");
+			rdata1.Span = history;
+			rdata2.Span = history;
 
-			ImGui::EndDockspace();
+
+			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+			ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
+			ImPlot::SetNextPlotLimitsY(0, 1);
+
+			if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
+				ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
+				ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
+				//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
+				ImPlot::EndPlot();
+			}
+			ImPlot::SetNextPlotLimitsX(0, history, ImGuiCond_Always);
+			ImPlot::SetNextPlotLimitsY(0, 1);
+			if (ImPlot::BeginPlot("##Rolling", NULL, NULL, ImVec2(-1, 150), 0, flags, flags)) {
+				ImPlot::PlotLine("Relative Error", &rdata1.Data[0].x, &rdata1.Data[0].y, rdata1.Data.size(), 0, 2 * sizeof(float));
+				//ImPlot::PlotLine("Mouse Y", &rdata2.Data[0].x, &rdata2.Data[0].y, rdata2.Data.size(), 0, 2 * sizeof(float));
+				ImPlot::EndPlot();
+			}
 		}
 		ImGui::End();
 

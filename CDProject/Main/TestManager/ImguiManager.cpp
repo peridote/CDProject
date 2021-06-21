@@ -82,7 +82,8 @@ void ImguiManager::Initialize(GLFWwindow* window)
 	ImFont* font = m_io->Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, m_io->Fonts->GetGlyphRangesJapanese());
 
 	// Our state
-	m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	//m_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	m_clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
 	m_fileDialog.SetTitle("title");
 	m_fileDialog.SetTypeFilters({ ".h", ".cpp", ".obj" });
@@ -178,13 +179,15 @@ void ImguiManager::createMainMenuBar()
 void ImguiManager::createLeftSideMenu()
 {
 	
-	if (ImGui::Begin("DockSpace"))
+	if (ImGui::Begin("Scene Hierarchy"))
 	{
+		ImGui::SetWindowPos(ImVec2(0, 20));
+		ImGui::SetWindowSize(ImVec2(130, 837), 0);
 		//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
-		ImGui::BeginDockspace();
+		//ImGui::BeginDockspace();
 
 		// left Menu
-		if (ImGui::BeginDock("Project Files"))
+		//if (ImGui::BeginDock("Project Files"))
 		{
 			//ImGui::SetWindowPos(ImVec2(0, 20));
 			//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
@@ -215,308 +218,198 @@ void ImguiManager::createLeftSideMenu()
 				ImGui::PopID();
 			}
 		}
-		ImGui::EndDock();
-
-		// rightMenu
-		if (ImGui::BeginDock("Properties"))
-		{
-			//ImGui::SetWindowPos(ImVec2(m_w / 6 * 4, 20));
-			//ImGui::SetWindowSize(ImVec2(m_w / 6 * 2, m_h / 3 * 2), 0);
-			
-			if (ImGui::BeginTabBar("right"))
-			{
-				
-				if (strcmp(m_filetree_current_item.c_str(), "(1)torus.obj") == 0)
-				{
-					static bool test1 = true;
-					ImGui::Checkbox("Collision", &test1);
-					static bool test2 = true;
-					ImGui::Checkbox("Visible", &test2);
-					static bool test3 = true;
-					ImGui::Checkbox("Static", &test3);
-					ImGui::EndTabBar();
-				}
-
-				else if (std::filesystem::path(m_filetree_current_item).extension() == ".obj")
-				{
-					int n = m_map_filetree_rigidbody.find(m_filetree_current_item)->second;
-					static bool test1 = true;
-					ImGui::Checkbox("Collision", &test1);
-					static bool test2 = true;
-					ImGui::Checkbox("Visible", &test2);
-					static bool test3 = true;
-
-					PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
-					PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
-					
-					static float rb_scale_x = 1.0f;
-					static float rb_scale_y = 1.0f;
-					static float rb_scale_z = 1.0f;
-					static float prev_rb_scale_x = 1.0f;
-					static float prev_rb_scale_y = 1.0f;
-					static float prev_rb_scale_z = 1.0f;
-
-					static float rb_trans_x = rb[n]->getPosition()(0);
-					static float rb_trans_y = rb[n]->getPosition()(1);
-					static float rb_trans_z = rb[n]->getPosition()(2);
-					static float prev_rb_trans_x = 0.0f;
-					static float prev_rb_trans_y = 0.0f;
-					static float prev_rb_trans_z = 0.0f;
-
-					static float rb_rot_w = rb[n]->getRotation().w();
-					static float rb_rot_x = rb[n]->getRotation().x();
-					static float rb_rot_y = rb[n]->getRotation().y();
-					static float rb_rot_z = rb[n]->getRotation().z();
-					static float prev_rb_rot_w = 1.0f;
-					static float prev_rb_rot_x = 0.0f;
-					static float prev_rb_rot_y = 0.0f;
-					static float prev_rb_rot_z = 0.0f;
-
-
-					ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
-					ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
-					ImGui::SliderFloat("rb_trans_z", &rb_trans_z, -5.0f, 5.0f);
-
-					//ImGui::SliderFloat("rb_rot_w", &rb_rot_w, -1.0f, 1.0f);
-					ImGui::SliderFloat("rb_rot_x", &rb_rot_x, 0.0f, 360.0f);
-					ImGui::SliderFloat("rb_rot_y", &rb_rot_y, 0.0f, 360.0f);
-					ImGui::SliderFloat("rb_rot_z", &rb_rot_z, 0.0f, 360.0f);
-
-					ImGui::SliderFloat("rb_scale_x", &rb_scale_x, 0.5f, 5.0f);
-					ImGui::SliderFloat("rb_scale_y", &rb_scale_y, 0.5f, 5.0f);
-					ImGui::SliderFloat("rb_scale_z", &rb_scale_z, 0.5f, 5.0f);
-
-					
-					for (int i = 0; i < 2; i++)
-					{
-						PBD::Simulation::switchCurrent();
-						PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
-						PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
-						if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
-
-							Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
-							rb[n]->getLastPosition() = trans_pos;
-							rb[n]->getOldPosition() = trans_pos;
-							rb[n]->getPosition() = trans_pos;
-							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-
-							if (i == 1)
-							{
-								prev_rb_trans_x = rb_trans_x;
-								prev_rb_trans_y = rb_trans_y;
-								prev_rb_trans_z = rb_trans_z;
-							}
-						}
-
-						if (rb_rot_x != prev_rb_rot_x)
-						{
-							rb_rot_w = cos(rb_rot_x / 2);
-							rb_rot_x = sin(rb_rot_x / 2);
-							rb_rot_y = 0;
-							rb_rot_z = 0;
-
-							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-							rb[n]->getLastRotation() = rot_quaternion;
-							rb[n]->getOldRotation() = rot_quaternion;
-							rb[n]->getRotation() = rot_quaternion;
-							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-
-							if (i == 1)
-							{
-								prev_rb_rot_w = rb_rot_w;
-								prev_rb_rot_x = rb_rot_x;
-								prev_rb_rot_y = rb_rot_y;
-								prev_rb_rot_z = rb_rot_z;
-							}
-
-						}
-						else if (rb_rot_y != prev_rb_rot_y)
-						{
-							rb_rot_w = cos(rb_rot_y / 2);
-							rb_rot_x = 0;
-							rb_rot_y = sin(rb_rot_y / 2);
-							rb_rot_z = 0;
-
-							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-							rb[n]->getLastRotation() = rot_quaternion;
-							rb[n]->getOldRotation() = rot_quaternion;
-							rb[n]->getRotation() = rot_quaternion;
-							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-							
-							if (i == 1)
-							{
-								prev_rb_rot_w = rb_rot_w;
-								prev_rb_rot_x = rb_rot_x;
-								prev_rb_rot_y = rb_rot_y;
-								prev_rb_rot_z = rb_rot_z;
-							}
-						}
-						else if (rb_rot_z != prev_rb_rot_z)
-						{
-							rb_rot_w = cos(rb_rot_z / 2);
-							rb_rot_x = 0;
-							rb_rot_y = 0;
-							rb_rot_z = sin(rb_rot_z / 2);
-
-							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-							rb[n]->getLastRotation() = rot_quaternion;
-							rb[n]->getOldRotation() = rot_quaternion;
-							rb[n]->getRotation() = rot_quaternion;
-							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-
-							if (i == 1)
-							{
-								prev_rb_rot_w = rb_rot_w;
-								prev_rb_rot_x = rb_rot_x;
-								prev_rb_rot_y = rb_rot_y;
-								prev_rb_rot_z = rb_rot_z;
-							}
-						}
-					}
-
-
-					/*if (rb_scale_x != prev_rb_scale_x || rb_scale_y != prev_rb_scale_y || rb_scale_z != prev_rb_scale_z) {
-
-						rb[n]->getGeometry().updateMeshScale(rb[n]->getPosition(), Vector3r(rb_scale_x / prev_rb_scale_x, rb_scale_y / prev_rb_scale_y, rb_scale_z / prev_rb_scale_z));
-						prev_rb_scale_x = rb_scale_x;
-						prev_rb_scale_y = rb_scale_y;
-						prev_rb_scale_z = rb_scale_z;
-					}*/
-
-					//if (ImGui::SliderFloat("x", &m_simulation->m_rigidbodies[n].m_translation(0), -1, 1) ||
-					//	ImGui::SliderFloat("y", &m_simulation->m_rigidbodies[n].m_translation(1), -1, 1) ||
-					//	ImGui::SliderFloat("z", &m_simulation->m_rigidbodies[n].m_translation(2), -1, 1) ||
-					//	ImGui::SliderFloat("rot_angle", &m_simulation->m_rigidbodies[n].m_rotation_angle, -1, 1)
-					//	) {
-					//	//if (ImGui::IsItemActive())
-					//		m_simulation->m_is_simulating = true;
-					//}
-					/*else
-						m_simulation->m_is_simulating = false;*/
-					ImGui::EndTabBar();
-				}
-			}
-		}
-		ImGui::EndDock();
+		//ImGui::EndDock();
 		
-		ImGui::EndDockspace();
+		//ImGui::EndDockspace();
 	}
 	ImGui::End();
 }
 
 void ImguiManager::createRightSideMenu()
 {
-	if (ImGui::Begin("right"))
+
+	if (ImGui::Begin("Properties"))
 	{
-		ImGui::BeginDockspace();
-		if (ImGui::BeginDock("right"))
+		ImGui::SetWindowPos(ImVec2(130 + 2 * m_w / 2.5, 20 + 467));
+		ImGui::SetWindowSize(ImVec2(254, 370));
+		//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
+		//ImGui::SetWindowPos(ImVec2(m_w / 6 * 4, 20));
+		//ImGui::SetWindowSize(ImVec2(m_w / 6 * 2, m_h / 3 * 2), 0);
+		if (ImGui::BeginTabBar("right"))
 		{
-			//ImGui::SetWindowPos(ImVec2(m_w / 6 * 4, 20));
-			//ImGui::SetWindowSize(ImVec2(m_w / 6 * 2, m_h / 3 * 2), 0);
-			if (ImGui::BeginTabBar("right"))
+
+			if (strcmp(m_filetree_current_item.c_str(), "(1)torus.obj") == 0)
 			{
-				if (strcmp(m_filetree_current_item.c_str(), "a") == 0)
-				{
-					static bool test1 = true;
-					ImGui::Checkbox("Test", &test1);
-					static bool test2 = true;
-					ImGui::Checkbox("Test2", &test2);
-					ImGui::EndTabBar();
-				}
+				static bool test1 = true;
+				ImGui::Checkbox("Collision", &test1);
+				static bool test2 = true;
+				ImGui::Checkbox("Visible", &test2);
+				static bool test3 = true;
+				ImGui::Checkbox("Static", &test3);
+				ImGui::EndTabBar();
+			}
 
-				else if (std::filesystem::path(m_filetree_current_item).extension() == ".obj")
-				{
-					int n = m_map_filetree_rigidbody.find(m_filetree_current_item)->second;
-					static bool test1 = true;
-					ImGui::Checkbox("Test", &test1);
-					static bool test2 = true;
-					ImGui::Checkbox("Test2", &test2);
-					static bool test3 = true;
-					ImGui::Checkbox("Test3", &test3);
-					static bool test4 = true;
-					ImGui::Checkbox("Test4", &test4);
+			else if (std::filesystem::path(m_filetree_current_item).extension() == ".obj")
+			{
+				int n = m_map_filetree_rigidbody.find(m_filetree_current_item)->second;
+				static bool test1 = true;
+				ImGui::Checkbox("Collision", &test1);
+				static bool test2 = true;
+				ImGui::Checkbox("Visible", &test2);
+				static bool test3 = true;
 
+				PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
+				PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+
+				static float rb_scale_x = 1.0f;
+				static float rb_scale_y = 1.0f;
+				static float rb_scale_z = 1.0f;
+				static float prev_rb_scale_x = 1.0f;
+				static float prev_rb_scale_y = 1.0f;
+				static float prev_rb_scale_z = 1.0f;
+
+				static float rb_trans_x = rb[n]->getPosition()(0);
+				static float rb_trans_y = rb[n]->getPosition()(1);
+				static float rb_trans_z = rb[n]->getPosition()(2);
+				static float prev_rb_trans_x = 0.0f;
+				static float prev_rb_trans_y = 0.0f;
+				static float prev_rb_trans_z = 0.0f;
+
+				static float rb_rot_w = rb[n]->getRotation().w();
+				static float rb_rot_x = rb[n]->getRotation().x();
+				static float rb_rot_y = rb[n]->getRotation().y();
+				static float rb_rot_z = rb[n]->getRotation().z();
+				static float prev_rb_rot_w = 1.0f;
+				static float prev_rb_rot_x = 0.0f;
+				static float prev_rb_rot_y = 0.0f;
+				static float prev_rb_rot_z = 0.0f;
+
+
+				ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
+				ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
+				ImGui::SliderFloat("rb_trans_z", &rb_trans_z, -5.0f, 5.0f);
+
+				//ImGui::SliderFloat("rb_rot_w", &rb_rot_w, -1.0f, 1.0f);
+				ImGui::SliderFloat("rb_rot_x", &rb_rot_x, 0.0f, 360.0f);
+				ImGui::SliderFloat("rb_rot_y", &rb_rot_y, 0.0f, 360.0f);
+				ImGui::SliderFloat("rb_rot_z", &rb_rot_z, 0.0f, 360.0f);
+
+				ImGui::SliderFloat("rb_scale_x", &rb_scale_x, 0.5f, 5.0f);
+				ImGui::SliderFloat("rb_scale_y", &rb_scale_y, 0.5f, 5.0f);
+				ImGui::SliderFloat("rb_scale_z", &rb_scale_z, 0.5f, 5.0f);
+
+
+				for (int i = 0; i < 2; i++)
+				{
+					PBD::Simulation::switchCurrent();
 					PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
 					PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+					if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
 
-					static float rb_scale_x = 1.0f;
-					static float rb_scale_y = 1.0f;
-					static float rb_scale_z = 1.0f;
-					static float prev_rb_scale_x = 1.0f;
-					static float prev_rb_scale_y = 1.0f;
-					static float prev_rb_scale_z = 1.0f;
+						Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
+						rb[n]->getLastPosition() = trans_pos;
+						rb[n]->getOldPosition() = trans_pos;
+						rb[n]->getPosition() = trans_pos;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
-					static float rb_trans_x = rb[n]->getPosition()(0);
-					static float rb_trans_y = rb[n]->getPosition()(1);
-					static float rb_trans_z = rb[n]->getPosition()(2);
-					static float prev_rb_trans_x = 0.0f;
-					static float prev_rb_trans_y = 0.0f;
-					static float prev_rb_trans_z = 0.0f;
+						if (i == 1)
+						{
+							prev_rb_trans_x = rb_trans_x;
+							prev_rb_trans_y = rb_trans_y;
+							prev_rb_trans_z = rb_trans_z;
+						}
+					}
 
-					static float rb_rot_w = rb[n]->getRotation().w();
-					static float rb_rot_x = rb[n]->getRotation().x();
-					static float rb_rot_y = rb[n]->getRotation().y();
-					static float rb_rot_z = rb[n]->getRotation().z();
-					static float prev_rb_rot_w = 0.0f;
-					static float prev_rb_rot_x = 0.0f;
-					static float prev_rb_rot_y = 0.0f;
-					static float prev_rb_rot_z = 0.0f;
+					if (rb_rot_x != prev_rb_rot_x)
+					{
+						rb_rot_w = cos(rb_rot_x / 2);
+						rb_rot_x = sin(rb_rot_x / 2);
+						rb_rot_y = 0;
+						rb_rot_z = 0;
 
-					ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
-					ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
-					ImGui::SliderFloat("rb_trans_z", &rb_trans_z, -5.0f, 5.0f);
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
-					ImGui::SliderFloat("rb_rot_x", &rb_rot_w, -1.0f, 1.0f);
-					ImGui::SliderFloat("rb_rot_x", &rb_rot_x, -1.0f, 1.0f);
-					ImGui::SliderFloat("rb_rot_y", &rb_rot_y, -1.0f, 1.0f);
-					ImGui::SliderFloat("rb_rot_z", &rb_rot_z, -1.0f, 1.0f);
+						if (i == 1)
+						{
+							prev_rb_rot_w = rb_rot_w;
+							prev_rb_rot_x = rb_rot_x;
+							prev_rb_rot_y = rb_rot_y;
+							prev_rb_rot_z = rb_rot_z;
+						}
 
-					ImGui::SliderFloat("rb_scale_x", &rb_scale_x, 0.5f, 5.0f);
-					ImGui::SliderFloat("rb_scale_y", &rb_scale_y, 0.5f, 5.0f);
-					ImGui::SliderFloat("rb_scale_z", &rb_scale_z, 0.5f, 5.0f);
+					}
+					else if (rb_rot_y != prev_rb_rot_y)
+					{
+						rb_rot_w = cos(rb_rot_y / 2);
+						rb_rot_x = 0;
+						rb_rot_y = sin(rb_rot_y / 2);
+						rb_rot_z = 0;
 
-					//if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z
-					//	|| rb_rot_x != prev_rb_rot_x || rb_rot_y != prev_rb_rot_y || rb_rot_z != prev_rb_rot_z) {
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
-					//	rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition() + Vector3r(rb_trans_x, rb_trans_y, rb_trans_z), Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w).matrix());
+						if (i == 1)
+						{
+							prev_rb_rot_w = rb_rot_w;
+							prev_rb_rot_x = rb_rot_x;
+							prev_rb_rot_y = rb_rot_y;
+							prev_rb_rot_z = rb_rot_z;
+						}
+					}
+					else if (rb_rot_z != prev_rb_rot_z)
+					{
+						rb_rot_w = cos(rb_rot_z / 2);
+						rb_rot_x = 0;
+						rb_rot_y = 0;
+						rb_rot_z = sin(rb_rot_z / 2);
 
-					//	prev_rb_trans_x = rb_trans_x;
-					//	prev_rb_trans_y = rb_trans_y;
-					//	prev_rb_trans_z = rb_trans_z;
+						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+						rb[n]->getLastRotation() = rot_quaternion;
+						rb[n]->getOldRotation() = rot_quaternion;
+						rb[n]->getRotation() = rot_quaternion;
+						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
-					//	//prev_rb_rot_w = rb_rot_w;
-					//	prev_rb_rot_x = rb_rot_x;
-					//	prev_rb_rot_y = rb_rot_y;
-					//	prev_rb_rot_z = rb_rot_z;
-					//}
-
-					/*if (rb_scale_x != prev_rb_scale_x || rb_scale_y != prev_rb_scale_y || rb_scale_z != prev_rb_scale_z) {
-
-						rb[n]->getGeometry().updateMeshScale(rb[n]->getPosition(), Vector3r(rb_scale_x / prev_rb_scale_x, rb_scale_y / prev_rb_scale_y, rb_scale_z / prev_rb_scale_z));
-						prev_rb_scale_x = rb_scale_x;
-						prev_rb_scale_y = rb_scale_y;
-						prev_rb_scale_z = rb_scale_z;
-					}*/
-
-					//if (ImGui::SliderFloat("x", &m_simulation->m_rigidbodies[n].m_translation(0), -1, 1) ||
-					//	ImGui::SliderFloat("y", &m_simulation->m_rigidbodies[n].m_translation(1), -1, 1) ||
-					//	ImGui::SliderFloat("z", &m_simulation->m_rigidbodies[n].m_translation(2), -1, 1) ||
-					//	ImGui::SliderFloat("rot_angle", &m_simulation->m_rigidbodies[n].m_rotation_angle, -1, 1)
-					//	) {
-					//	//if (ImGui::IsItemActive())
-					//		m_simulation->m_is_simulating = true;
-					//}
-					/*else
-						m_simulation->m_is_simulating = false;*/
-					ImGui::EndTabBar();
+						if (i == 1)
+						{
+							prev_rb_rot_w = rb_rot_w;
+							prev_rb_rot_x = rb_rot_x;
+							prev_rb_rot_y = rb_rot_y;
+							prev_rb_rot_z = rb_rot_z;
+						}
+					}
 				}
+
+
+				/*if (rb_scale_x != prev_rb_scale_x || rb_scale_y != prev_rb_scale_y || rb_scale_z != prev_rb_scale_z) {
+
+					rb[n]->getGeometry().updateMeshScale(rb[n]->getPosition(), Vector3r(rb_scale_x / prev_rb_scale_x, rb_scale_y / prev_rb_scale_y, rb_scale_z / prev_rb_scale_z));
+					prev_rb_scale_x = rb_scale_x;
+					prev_rb_scale_y = rb_scale_y;
+					prev_rb_scale_z = rb_scale_z;
+				}*/
+
+				//if (ImGui::SliderFloat("x", &m_simulation->m_rigidbodies[n].m_translation(0), -1, 1) ||
+				//	ImGui::SliderFloat("y", &m_simulation->m_rigidbodies[n].m_translation(1), -1, 1) ||
+				//	ImGui::SliderFloat("z", &m_simulation->m_rigidbodies[n].m_translation(2), -1, 1) ||
+				//	ImGui::SliderFloat("rot_angle", &m_simulation->m_rigidbodies[n].m_rotation_angle, -1, 1)
+				//	) {
+				//	//if (ImGui::IsItemActive())
+				//		m_simulation->m_is_simulating = true;
+				//}
+				/*else
+					m_simulation->m_is_simulating = false;*/
+				ImGui::EndTabBar();
 			}
 		}
-		ImGui::EndDock();
-		ImGui::EndDockspace();
 	}
 	ImGui::End();
-
 }
 
 void ImguiManager::createCenterMenu()
@@ -534,9 +427,17 @@ void ImguiManager::createCenterMenu()
 
 void ImguiManager::createBottomMenu()
 {
+	if (ImGui::Begin("Message"))
+	{
+		ImGui::SetWindowPos(ImVec2(130, m_h / 2.5 + 275));
+		ImGui::SetWindowSize(ImVec2(2 * m_w / 2.5, 150));
+
+	}
+	ImGui::End();
+
 	ImGui::Begin("Files");
-	ImGui::SetWindowPos(ImVec2(0, m_h / 3 * 2 + 140));
-	ImGui::SetWindowSize(ImVec2(m_w, m_h / 3 - 180));
+	ImGui::SetWindowPos(ImVec2(0, m_h / 2.5 + 425));
+	ImGui::SetWindowSize(ImVec2(m_w, 223));
 	if (ImGui::BeginTabBar("bottom"))
 	{
 
