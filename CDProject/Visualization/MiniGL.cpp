@@ -465,7 +465,7 @@ void MiniGL::display()
 	//glutSwapBuffers();
 	//glFlush();
 
-	drawElements();
+	//drawElements();
 
 	if (scenefunc != NULL)
 		scenefunc();

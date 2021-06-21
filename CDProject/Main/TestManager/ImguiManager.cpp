@@ -113,7 +113,6 @@ void ImguiManager::Initialize(GLFWwindow* window)
 		return exit(1);
 	}
 
-	fbo_init();
 }
 
 void ImguiManager::StartFrame()
@@ -287,74 +286,94 @@ void ImguiManager::createLeftSideMenu()
 					ImGui::SliderFloat("rb_scale_y", &rb_scale_y, 0.5f, 5.0f);
 					ImGui::SliderFloat("rb_scale_z", &rb_scale_z, 0.5f, 5.0f);
 
-					if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
-						
-						Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
-						rb[n]->getLastPosition() = trans_pos;
-						rb[n]->getOldPosition() = trans_pos;
-						rb[n]->getPosition() = trans_pos;
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-
-						prev_rb_trans_x = rb_trans_x;
-						prev_rb_trans_y = rb_trans_y;
-						prev_rb_trans_z = rb_trans_z;
-
-						
-					}
-
-					if (rb_rot_x != prev_rb_rot_x)
+					
+					for (int i = 0; i < 2; i++)
 					{
-						rb_rot_w = cos(rb_rot_x / 2);
-						rb_rot_x = sin(rb_rot_x/2);
-						rb_rot_y = 0;
-						rb_rot_z = 0;
+						PBD::Simulation::switchCurrent();
+						PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
+						PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+						if (rb_trans_x != prev_rb_trans_x || rb_trans_y != prev_rb_trans_y || rb_trans_z != prev_rb_trans_z) {
 
-						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-						rb[n]->getLastRotation() = rot_quaternion;
-						rb[n]->getOldRotation() = rot_quaternion;
-						rb[n]->getRotation() = rot_quaternion;
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
+							Vector3r trans_pos = Vector3r(rb_trans_x, rb_trans_y, rb_trans_z);
+							rb[n]->getLastPosition() = trans_pos;
+							rb[n]->getOldPosition() = trans_pos;
+							rb[n]->getPosition() = trans_pos;
+							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
 
-						prev_rb_rot_w = rb_rot_w;
-						prev_rb_rot_x = rb_rot_x;
-						prev_rb_rot_y = rb_rot_y;
-						prev_rb_rot_z = rb_rot_z;
+							if (i == 1)
+							{
+								prev_rb_trans_x = rb_trans_x;
+								prev_rb_trans_y = rb_trans_y;
+								prev_rb_trans_z = rb_trans_z;
+							}
+						}
+
+						if (rb_rot_x != prev_rb_rot_x)
+						{
+							rb_rot_w = cos(rb_rot_x / 2);
+							rb_rot_x = sin(rb_rot_x / 2);
+							rb_rot_y = 0;
+							rb_rot_z = 0;
+
+							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+							rb[n]->getLastRotation() = rot_quaternion;
+							rb[n]->getOldRotation() = rot_quaternion;
+							rb[n]->getRotation() = rot_quaternion;
+							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
+
+							if (i == 1)
+							{
+								prev_rb_rot_w = rb_rot_w;
+								prev_rb_rot_x = rb_rot_x;
+								prev_rb_rot_y = rb_rot_y;
+								prev_rb_rot_z = rb_rot_z;
+							}
+
+						}
+						else if (rb_rot_y != prev_rb_rot_y)
+						{
+							rb_rot_w = cos(rb_rot_y / 2);
+							rb_rot_x = 0;
+							rb_rot_y = sin(rb_rot_y / 2);
+							rb_rot_z = 0;
+
+							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+							rb[n]->getLastRotation() = rot_quaternion;
+							rb[n]->getOldRotation() = rot_quaternion;
+							rb[n]->getRotation() = rot_quaternion;
+							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
+							
+							if (i == 1)
+							{
+								prev_rb_rot_w = rb_rot_w;
+								prev_rb_rot_x = rb_rot_x;
+								prev_rb_rot_y = rb_rot_y;
+								prev_rb_rot_z = rb_rot_z;
+							}
+						}
+						else if (rb_rot_z != prev_rb_rot_z)
+						{
+							rb_rot_w = cos(rb_rot_z / 2);
+							rb_rot_x = 0;
+							rb_rot_y = 0;
+							rb_rot_z = sin(rb_rot_z / 2);
+
+							Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
+							rb[n]->getLastRotation() = rot_quaternion;
+							rb[n]->getOldRotation() = rot_quaternion;
+							rb[n]->getRotation() = rot_quaternion;
+							rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
+
+							if (i == 1)
+							{
+								prev_rb_rot_w = rb_rot_w;
+								prev_rb_rot_x = rb_rot_x;
+								prev_rb_rot_y = rb_rot_y;
+								prev_rb_rot_z = rb_rot_z;
+							}
+						}
 					}
-					else if (rb_rot_y != prev_rb_rot_y)
-					{ 
-						rb_rot_w = cos(rb_rot_y / 2);
-						rb_rot_x = 0;
-						rb_rot_y = sin(rb_rot_y / 2);
-						rb_rot_z = 0;
 
-						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-						rb[n]->getLastRotation() = rot_quaternion;
-						rb[n]->getOldRotation() = rot_quaternion;
-						rb[n]->getRotation() = rot_quaternion;
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-						prev_rb_rot_w = rb_rot_w;
-						prev_rb_rot_x = rb_rot_x;
-						prev_rb_rot_y = rb_rot_y;
-						prev_rb_rot_z = rb_rot_z;
-					}
-					else if (rb_rot_z != prev_rb_rot_z)
-					{ 
-						rb_rot_w = cos(rb_rot_z / 2);
-						rb_rot_x = 0;
-						rb_rot_y = 0;
-						rb_rot_z = sin(rb_rot_z / 2);
-
-						Quaternionr rot_quaternion = Quaternionr(rb_rot_x, rb_rot_y, rb_rot_z, rb_rot_w);
-						rb[n]->getLastRotation() = rot_quaternion;
-						rb[n]->getOldRotation() = rot_quaternion;
-						rb[n]->getRotation() = rot_quaternion;
-						rb[n]->getGeometry().updateMeshTransformation(rb[n]->getPosition(), rb[n]->getRotation().matrix());
-
-						prev_rb_rot_w = rb_rot_w;
-						prev_rb_rot_x = rb_rot_x;
-						prev_rb_rot_y = rb_rot_y;
-						prev_rb_rot_z = rb_rot_z;
-					}
 
 					/*if (rb_scale_x != prev_rb_scale_x || rb_scale_y != prev_rb_scale_y || rb_scale_z != prev_rb_scale_z) {
 
@@ -559,6 +578,9 @@ void ImguiManager::createFileDialogBtn()
 			m_filetree_double_clicked_item = selected;
 
 			addRigidbody(m_fileDialog.GetSelected().string().c_str());
+			PBD::Simulation::switchCurrent();
+			addRigidbody(m_fileDialog.GetSelected().string().c_str());
+			PBD::Simulation::switchCurrent();
 			//bool res = UtilManager::loadOBJ(m_fileDialog.GetSelected().string().c_str(), vertices, uvs, normals);
 		}
 
@@ -672,6 +694,9 @@ std::pair<bool, uint32_t> ImguiManager::DirectoryTreeViewRecursive(const std::fi
 				m_filetree_double_clicked_item = name.c_str();
 
 				addRigidbody(entry.path().string());
+				PBD::Simulation::switchCurrent();
+				addRigidbody(entry.path().string());
+				PBD::Simulation::switchCurrent();
 				/*std::string fileName = Utilities::FileSystem::normalizePath(entry.path().string().c_str());
 				Utilities::IndexedFaceMesh mesh;
 				PBD::VertexData vd;
@@ -750,20 +775,20 @@ void ImguiManager::fbo_init()
 	float rotation_degree = 0.0f;
 
 	glEnable(GL_TEXTURE_2D);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
+
+	glGenFramebuffersEXT(1, &m_fbo);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo); // Bind our frame buffer  
+
 	glGenRenderbuffersEXT(1, &m_fbo_depth);
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_fbo_depth);
-
 	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, window_width, window_height);
-
 	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo_depth);
 
 	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 
 	glGenTextures(1, &m_fbo_texture);
-
 	glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
-
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
@@ -775,12 +800,9 @@ void ImguiManager::fbo_init()
 	// Unbind the texture  
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenFramebuffersEXT(1, &m_fbo);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo); // Bind our frame buffer  
-
 	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_fbo_texture, 0); // Attach the texture fbo_texture to the color buffer in our frame buffer  
 
-	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo_depth); // Attach the depth buffer fbo_depth to our frame buffer  
+	//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo_depth); // Attach the depth buffer fbo_depth to our frame buffer  
 
 	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 
@@ -791,9 +813,72 @@ void ImguiManager::fbo_init()
 	}
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // Unbind our frame buffer 
 }
-void ImguiManager::fbo_bind()
+
+void ImguiManager::fbo2_init()
 {
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo); // Bind our frame buffer for rendering 
+	int window_width = m_w;
+	int window_height = m_h;
+
+	float rotation_degree = 0.0f;
+
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
+
+	glGenFramebuffersEXT(1, &m_fbo2);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo2); // Bind our frame buffer  
+
+	glGenRenderbuffersEXT(1, &m_fbo_depth2);
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_fbo_depth2);
+	glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, window_width, window_height);
+	glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo_depth2);
+
+	glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+
+
+
+	glGenTextures(1, &m_fbo_texture2);
+	glBindTexture(GL_TEXTURE_2D, m_fbo_texture2);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// Unbind the texture  
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_fbo_texture2, 0); // Attach the texture fbo_texture to the color buffer in our frame buffer  
+
+
+	//glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_fbo_depth); // Attach the depth buffer fbo_depth to our frame buffer  
+
+	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
+	if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+	{
+		std::cout << "Couldn't create frame buffer" << std::endl;
+		exit(0);
+	}
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // Unbind our frame buffer 
+}
+
+void ImguiManager::fbo_bind(unsigned int n)
+{
+	switch (n)
+	{
+	case 0:
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo); // Bind our frame buffer for rendering
+		break;
+	case 1:
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo2); // Bind our frame buffer for rendering 
+		break;
+	default:
+		break;
+	}
+	
 
 	glPushAttrib(GL_VIEWPORT_BIT | GL_ENABLE_BIT);
 	glViewport(0, 0, m_w, m_h);
@@ -805,7 +890,7 @@ void ImguiManager::fbo_bind()
 
 
 }
-void ImguiManager::fbo_unbind()
+void ImguiManager::fbo_unbind(unsigned int n)
 {
 	glPopAttrib();
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // Unbind our texture 
@@ -814,8 +899,17 @@ void ImguiManager::fbo_unbind()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
-
-	glBindTexture(GL_TEXTURE_2D, m_fbo_texture); // Bind our frame buffer texture 
+	switch (n)
+	{
+	case 0:
+		glBindTexture(GL_TEXTURE_2D, m_fbo_texture); // Bind our frame buffer texture 
+		break;
+	case 1:
+		glBindTexture(GL_TEXTURE_2D, m_fbo_texture2); // Bind our frame buffer texture 
+		break;
+	default:
+		break;
+	}
 }
 
 void ImguiManager::fbo_cleanup()
@@ -824,6 +918,11 @@ void ImguiManager::fbo_cleanup()
 	glDeleteRenderbuffersEXT(1, &m_fbo_depth);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 	glDeleteFramebuffersEXT(1, &m_fbo);
+
+	glDeleteTextures(1, &m_fbo_texture2);
+	glDeleteRenderbuffersEXT(1, &m_fbo_depth2);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	glDeleteFramebuffersEXT(1, &m_fbo2);
 }
 
 

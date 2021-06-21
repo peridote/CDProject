@@ -36,6 +36,8 @@ namespace PBD
 
 	private:
 		static Simulation *current;
+		static Simulation* m_simul1;
+		static Simulation* m_simul2;
 
 	public:
 		Simulation ();
@@ -46,6 +48,8 @@ namespace PBD
 
 		// Singleton
 		static Simulation* getCurrent ();
+		// switch current between m_simul1 and m_simul2
+		static void switchCurrent();
 		static void setCurrent (Simulation* tm);
 		static bool hasCurrent();
 

@@ -29,10 +29,11 @@ using namespace Utilities;
 
 void timeStep();
 void buildModel();
+void buildModel2();
 void createMesh();
 void render();
 void restart();
-void reset(ImguiManager* im);
+void reset(ImguiManager* im, unsigned int n);
 void reset();
 void initParameters();
 void exportMeshOBJ();
@@ -57,6 +58,7 @@ unsigned int frameCounter = 1;
 DemoBase* base;
 DemoBase* base2;
 DistanceFieldCollisionDetection cd;
+DistanceFieldCollisionDetection cd2;
 //GLFWwindow* window = NULL; 
 
 // main 
@@ -67,16 +69,24 @@ int main(int argc, char** argv)
 	base = new DemoBase();
 	base->init(argc, argv, "Cloth simulation");
 
+	//base2 = new DemoBase();
+	//base2->init(argc, argv, "Cloth simulation");
 
 	SimulationModel* model = new SimulationModel();
 	model->init();
 	Simulation::getCurrent()->setModel(model);
-
 	buildModel();
-
 	initParameters();
-
 	Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { reset(); initParameters(); base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	Simulation::switchCurrent();
+
+	SimulationModel* model2 = new SimulationModel();
+	model2->init();
+	Simulation::getCurrent()->setModel(model2);
+	buildModel2();
+	initParameters();
+	Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { reset(); initParameters(); base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	Simulation::switchCurrent();
 
 	//// OpenGL
 	MiniGL::setClientIdleFunc(50, timeStep);
@@ -93,6 +103,9 @@ int main(int argc, char** argv)
 
 	ImguiManager* im = new ImguiManager();
 	im->Initialize(base->getWindow());
+
+	im->fbo_init(); // m_fbo_texture
+	im->fbo2_init(); // m_fbo_texture2
 
 	int my_image_width = 500;
 	int my_image_height = 500;
@@ -112,13 +125,17 @@ int main(int argc, char** argv)
 		}
 
 		// render to texture
-		im->fbo_bind();
-
+		im->fbo_bind(0);
 		MiniGL::display();
 		timeStep();
+		im->fbo_unbind(0);
+		Simulation::switchCurrent();
 
-		im->fbo_unbind();
-
+		im->fbo_bind(1);
+		MiniGL::display();
+		timeStep();
+		im->fbo_unbind(1);
+		Simulation::switchCurrent();
 
 		// camera Menu
 		static float trans_x = 7.0f;
@@ -144,10 +161,16 @@ int main(int argc, char** argv)
 		if (ImGui::Button("Restart"))
 		{
 			restart();
+			Simulation::switchCurrent();
+			restart();
+			Simulation::switchCurrent();
 		}
 		if (ImGui::Button("Reset"))
 		{
-			reset(im);
+			reset(im, 0);
+			Simulation::switchCurrent();
+			reset(im, 1);
+			Simulation::switchCurrent();
 		}
 
 		ImGui::SliderFloat("trans_x", &trans_x, -50.0f, 50.0f);
@@ -180,6 +203,7 @@ int main(int argc, char** argv)
 		if (ImGui::Begin("Scene1"))
 		{
 			// dock layout by hard-coded or .ini file
+
 			ImGui::BeginDockspace();
 
 			if (ImGui::BeginDock("Scene_1")) {
@@ -258,7 +282,7 @@ int main(int argc, char** argv)
 				ImVec2 wsize2 = ImGui::GetWindowSize();
 				MiniGL::width = im->m_w;
 				MiniGL::height = im->m_h;
-				ImGui::Image((void*)(intptr_t)im->m_fbo_texture, ImVec2(wsize2.x, wsize2.y), ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image((void*)(intptr_t)im->m_fbo_texture2, ImVec2(wsize2.x, wsize2.y), ImVec2(0, 1), ImVec2(1, 0));
 
 			}
 			ImGui::EndDock();
@@ -381,7 +405,7 @@ void restart()
 	//	m_constraints[i]->updateConstraint(*model);
 }
 
-void reset(ImguiManager* im)
+void reset(ImguiManager* im, unsigned int n)
 {
 	Utilities::Timing::printAverageTimes();
 	Utilities::Timing::reset();
@@ -391,8 +415,18 @@ void reset(ImguiManager* im)
 
 	Simulation::getCurrent()->getModel()->cleanup();
 	Simulation::getCurrent()->getTimeStep()->getCollisionDetection()->cleanup();
-
-	buildModel();
+	
+	switch (n)
+	{
+	case 0:
+		buildModel();
+		break;
+	case 1:
+		buildModel2();
+		break;
+	default:
+		break;
+	}
 
 	im->reset();
 }
@@ -545,6 +579,69 @@ void buildModel()
 		unsigned int offset = tm[i]->getIndexOffset();
 		tm[i]->setFrictionCoeff(static_cast<Real>(0.1));
 		cd.addCollisionObjectWithoutGeometry(i, CollisionDetection::CollisionObject::TriangleModelCollisionObjectType, &pd.getPosition(offset), nVert, true);
+	}
+}
+
+void buildModel2()
+{
+	TimeManager::getCurrent()->setTimeStepSize(static_cast<Real>(0.005));
+
+	createMesh();
+
+	// create static rigid body
+	string fileName = FileSystem::normalizePath(base->getDataPath() + "/models/cube.obj");
+	IndexedFaceMesh mesh;
+	VertexData vd;
+	loadObj(fileName, vd, mesh, Vector3r::Ones());
+
+	string fileNameTorus = FileSystem::normalizePath(base->getDataPath() + "/models/torus.obj");
+	IndexedFaceMesh meshTorus;
+	VertexData vdTorus;
+	loadObj(fileNameTorus, vdTorus, meshTorus, Vector3r::Ones());
+
+	SimulationModel* model = Simulation::getCurrent()->getModel();
+	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+
+	rb.resize(2);
+	// floor
+	rb[0] = new RigidBody();
+	rb[0]->initBody(1.0,
+		Vector3r(0.0, -5.5, 0.0),
+		Quaternionr(1.0, 0.0, 0.0, 0.0),
+		vd, mesh,
+		Vector3r(100.0, 1.0, 100.0));
+	rb[0]->setMass(0.0);
+
+	// torus
+	rb[1] = new RigidBody();
+	rb[1]->initBody(1.0,
+		Vector3r(5.0, -1.5, 5.0),
+		Quaternionr(1.0, 0.0, 0.0, 0.0),
+		vdTorus, meshTorus,
+		Vector3r(2.0, 2.0, 2.0));
+	rb[1]->setMass(0.0);
+	rb[1]->setFrictionCoeff(static_cast<Real>(0.1));
+
+	Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd2);
+
+	cd2.setTolerance(static_cast<Real>(0.05));
+
+	const std::vector<Vector3r>* vertices1 = rb[0]->getGeometry().getVertexDataLocal().getVertices();
+	const unsigned int nVert1 = static_cast<unsigned int>(vertices1->size());
+	cd2.addCollisionBox(0, CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices1)[0], nVert1, Vector3r(100.0, 1.0, 100.0));
+
+	const std::vector<Vector3r>* vertices2 = rb[1]->getGeometry().getVertexDataLocal().getVertices();
+	const unsigned int nVert2 = static_cast<unsigned int>(vertices2->size());
+	cd2.addCollisionTorus(1, CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices2)[0], nVert2, Vector2r(2.0, 1.0));
+
+	SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
+	ParticleData& pd = model->getParticles();
+	for (unsigned int i = 0; i < tm.size(); i++)
+	{
+		const unsigned int nVert = tm[i]->getParticleMesh().numVertices();
+		unsigned int offset = tm[i]->getIndexOffset();
+		tm[i]->setFrictionCoeff(static_cast<Real>(0.1));
+		cd2.addCollisionObjectWithoutGeometry(i, CollisionDetection::CollisionObject::TriangleModelCollisionObjectType, &pd.getPosition(offset), nVert, true);
 	}
 }
 
