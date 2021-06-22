@@ -38,6 +38,7 @@ void reset();
 void initParameters();
 void exportMeshOBJ();
 void exportOBJ();
+void evalMomentum(Vector3r& momentum);
 void TW_CALL setBendingMethod(const void* value, void* clientData);
 void TW_CALL getBendingMethod(void* value, void* clientData);
 void TW_CALL setSimulationMethod(const void* value, void* clientData);
@@ -50,6 +51,8 @@ void TW_CALL getSimulationMethod(void* value, void* clientData);
 //const Real height = 10.0;
 //short simulationMethod = 2;
 //short bendingMethod = 2;
+Vector3r momentum1 = Vector3r(0.0, 0.0, 0.0);
+Vector3r momentum2 = Vector3r(0.0, 0.0, 0.0);
 bool doPause = true;
 bool enableExportOBJ = false;
 unsigned int exportFPS = 25;
@@ -223,18 +226,22 @@ int main(int argc, char** argv)
 
 
 			//ImGui::BulletText("Move your mouse to change the data!");
-			ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
+			ImGui::BulletText("This graph shows some physical quantities.");
 			static ImguiManager::ScrollingBuffer sdata1, sdata2;
 			static ImguiManager::RollingBuffer   rdata1, rdata2;
 			ImVec2 mouse = ImGui::GetMousePos();
 			static float t = 0;
 			if (onOff) {
+				evalMomentum(momentum1);
+				Simulation::switchCurrent();
+
+
 				t += ImGui::GetIO().DeltaTime;
 
-				sdata1.AddPoint(t, 1 / 100);
-				rdata1.AddPoint(t, 1 / 100);
-				sdata2.AddPoint(t, 1 / 100);
-				rdata2.AddPoint(t, 1 / 100);
+				sdata1.AddPoint(t, momentum1.norm());
+				rdata1.AddPoint(t, momentum1.norm());
+				//sdata2.AddPoint(t, momentum2.norm());
+				//rdata2.AddPoint(t, momentum2.norm());
 
 			}
 			else {
@@ -248,13 +255,13 @@ int main(int argc, char** argv)
 			rdata1.Span = history;
 			rdata2.Span = history;
 
-			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels; 
 			ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
-			ImPlot::SetNextPlotLimitsY(0, 1);
+			ImPlot::SetNextPlotLimitsY(0, 20);
 
 			if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
 				ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-				ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
+				ImPlot::PlotShaded("Linear Momentum", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
 				//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
 				ImPlot::EndPlot();
 			}
@@ -288,18 +295,21 @@ int main(int argc, char** argv)
 
 
 			//ImGui::BulletText("Move your mouse to change the data!");
-			ImGui::BulletText("This assumes 60 FPS. Higher FPS requires larger buffer size.");
+			ImGui::BulletText("This graph shows some physical quantities.");
 			static ImguiManager::ScrollingBuffer sdata1, sdata2;
 			static ImguiManager::RollingBuffer   rdata1, rdata2;
 			ImVec2 mouse = ImGui::GetMousePos();
 			static float t = 0;
 			if (onOff) {
+				evalMomentum(momentum2);
+				Simulation::switchCurrent();
+
 				t += ImGui::GetIO().DeltaTime;
 
-				sdata1.AddPoint(t, 1 / 100);
-				rdata1.AddPoint(t, 1 / 100);
-				sdata2.AddPoint(t, 1 / 100);
-				rdata2.AddPoint(t, 1 / 100);
+				sdata1.AddPoint(t, momentum2.norm());
+				rdata1.AddPoint(t, momentum2.norm());
+				//sdata2.AddPoint(t, 1 / 100);
+				//rdata2.AddPoint(t, 1 / 100);
 			}
 			else {
 				sdata1.AddPoint(t, 0);
@@ -315,11 +325,11 @@ int main(int argc, char** argv)
 
 			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
 			ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
-			ImPlot::SetNextPlotLimitsY(0, 1);
+			ImPlot::SetNextPlotLimitsY(0, 20);
 
 			if (ImPlot::BeginPlot("##Scrolling", NULL, NULL, ImVec2(-1, 150), 0)) {
 				ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL, 0.5f);
-				ImPlot::PlotShaded("Relative Error", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
+				ImPlot::PlotShaded("Linear Momentum", &sdata1.Data[0].x, &sdata1.Data[0].y, sdata1.Data.size(), -INFINITY, sdata1.Offset, 2 * sizeof(float));
 				//ImPlot::PlotLine("Mouse Y", &sdata2.Data[0].x, &sdata2.Data[0].y, sdata2.Data.size(), sdata2.Offset, 2 * sizeof(float));
 				ImPlot::EndPlot();
 			}
@@ -700,6 +710,26 @@ void exportOBJ()
 
 
 	frameCounter++;
+}
+
+void evalMomentum(Vector3r& momentum)
+{
+	SimulationModel* model = Simulation::getCurrent()->getModel();
+	const ParticleData& pd = model->getParticles();
+	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+
+	momentum = Vector3r(0.0,0.0,0.0);
+	// momentum of rigid bodies
+	for (int i = 0; i < rb.size(); i++)
+	{
+		momentum += rb[i]->getVelocity() * rb[i]->getMass();
+	}
+
+	// momentum of particles
+	for (int i = 0; i < pd.size(); i++)
+	{
+		momentum += pd.getVelocity(i) * pd.getMass(i)/pd.size();
+	}
 }
 
 void TW_CALL setBendingMethod(const void* value, void* clientData)
