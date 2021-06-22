@@ -7,6 +7,18 @@
 
 #include "ImguiManager.h"
 
+const int nRows = 50;
+const int nCols = 50;
+const Real width = 10.0;
+const Real height = 10.0;
+short simulationMethod = 2;
+short bendingMethod = 2;
+int nCloth = 0;
+int nTorus = 0;
+int nSphere = 0;
+int nCylinder = 0;
+int nCube = 0;
+int nCustom = 0;
 
 ImguiManager::ImguiManager()
 {
@@ -15,10 +27,23 @@ ImguiManager::ImguiManager()
 	m_clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 	m_filetreeitem_current_idx = 0;
 	m_filetree_double_clicked_item = "";
-	m_filetreeitems = {"(1)torus.obj"};
-	m_filetree_num = 2; // cloth collision demo 에 이미 2개 생성 되있음
+	//m_torus_tree_items = {""};
+	m_rigidbody_num = 1; // ground가 이미 있어서 1로 초기화
+	which_tree = 6;
 
 	translation = Eigen::Vector3f(0, 0, 0);
+
+	window_flags = 0;
+	//if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
+	//if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+	//if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
+	window_flags |= ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoResize;
+	window_flags |= ImGuiWindowFlags_NoCollapse;
+	//if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
+	//if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
+	//if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	//if (no_close)           p_open = NULL; // Don't pass our bool* to Begin
 }
 
 ImguiManager::~ImguiManager()
@@ -154,9 +179,22 @@ void ImguiManager::Cleanup()
 
 void ImguiManager::reset()
 {
-	m_filetreeitems.clear();
-	m_filetreeitems.push_back("(1)torus.obj"); // 현재 collision demo 기본 obj가 tours라서 넣어줌...
-	m_filetree_num = 2;
+	m_cube_tree_items.clear();
+	m_cylinder_tree_items.clear();
+	m_sphere_tree_items.clear();
+	m_cloth_tree_items.clear();
+	m_torus_tree_items.clear();
+	m_custom_tree_items.clear();
+	m_map_filetree_rigidbody.clear();
+	//m_custom_tree_items.push_back("(1)torus.obj"); // 현재 collision demo 기본 obj가 tours라서 넣어줌...
+	m_rigidbody_num = 1;
+
+	nCloth = 0;
+	nTorus = 0;
+	nSphere = 0;
+	nCylinder = 0;
+	nCube = 0;
+	nCustom = 0;
 }
 
 void ImguiManager::createMainMenuBar()
@@ -176,51 +214,513 @@ void ImguiManager::createMainMenuBar()
 	}
 }
 
+/** Create a particle model mesh
+*/
+void ImguiManager::createMesh()
+{
+	PBD::TriangleModel::ParticleMesh::UVs uvs;
+	uvs.resize(nRows * nCols);
+
+	const Real dy = width / (Real)(nCols - 1);
+	const Real dx = height / (Real)(nRows - 1);
+
+	Vector3r points[nRows * nCols];
+	for (int i = 0; i < nRows; i++)
+	{
+		for (int j = 0; j < nCols; j++)
+		{
+			const Real y = (Real)dy * j;
+			const Real x = (Real)dx * i;
+			points[i * nCols + j] = Vector3r(x, 1.0, y);
+
+			uvs[i * nCols + j][0] = x / width;
+			uvs[i * nCols + j][1] = y / height;
+		}
+	}
+	const int nIndices = 6 * (nRows - 1) * (nCols - 1);
+
+	PBD::TriangleModel::ParticleMesh::UVIndices uvIndices;
+	uvIndices.resize(nIndices);
+
+	unsigned int indices[nIndices];
+	int index = 0;
+	for (int i = 0; i < nRows - 1; i++)
+	{
+		for (int j = 0; j < nCols - 1; j++)
+		{
+			int helper = 0;
+			if (i % 2 == j % 2)
+				helper = 1;
+
+			indices[index] = i * nCols + j;
+			indices[index + 1] = i * nCols + j + 1;
+			indices[index + 2] = (i + 1) * nCols + j + helper;
+
+			uvIndices[index] = i * nCols + j;
+			uvIndices[index + 1] = i * nCols + j + 1;
+			uvIndices[index + 2] = (i + 1) * nCols + j + helper;
+			index += 3;
+
+			indices[index] = (i + 1) * nCols + j + 1;
+			indices[index + 1] = (i + 1) * nCols + j;
+			indices[index + 2] = i * nCols + j + 1 - helper;
+
+			uvIndices[index] = (i + 1) * nCols + j + 1;
+			uvIndices[index + 1] = (i + 1) * nCols + j;
+			uvIndices[index + 2] = i * nCols + j + 1 - helper;
+			index += 3;
+		}
+	}
+
+	PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
+	model->addTriangleModel(nRows * nCols, nIndices / 3, &points[0], &indices[0], uvIndices, uvs);
+
+	PBD::ParticleData& pd = model->getParticles();
+	for (unsigned int i = 0; i < pd.getNumberOfParticles(); i++)
+	{
+		pd.setMass(i, 1.0);
+	}
+
+	// init constraints
+	for (unsigned int cm = 0; cm < model->getTriangleModels().size(); cm++)
+	{
+		if (simulationMethod == 1)
+		{
+			const unsigned int offset = model->getTriangleModels()[cm]->getIndexOffset();
+			const unsigned int nEdges = model->getTriangleModels()[cm]->getParticleMesh().numEdges();
+			const Utilities::IndexedFaceMesh::Edge* edges = model->getTriangleModels()[cm]->getParticleMesh().getEdges().data();
+			for (unsigned int i = 0; i < nEdges; i++)
+			{
+				const unsigned int v1 = edges[i].m_vert[0] + offset;
+				const unsigned int v2 = edges[i].m_vert[1] + offset;
+
+				model->addDistanceConstraint(v1, v2);
+			}
+		}
+		else if (simulationMethod == 2)
+		{
+			const unsigned int offset = model->getTriangleModels()[cm]->getIndexOffset();
+			PBD::TriangleModel::ParticleMesh& mesh = model->getTriangleModels()[cm]->getParticleMesh();
+			const unsigned int* tris = mesh.getFaces().data();
+			const unsigned int nFaces = mesh.numFaces();
+			for (unsigned int i = 0; i < nFaces; i++)
+			{
+				const unsigned int v1 = tris[3 * i] + offset;
+				const unsigned int v2 = tris[3 * i + 1] + offset;
+				const unsigned int v3 = tris[3 * i + 2] + offset;
+				model->addFEMTriangleConstraint(v1, v2, v3);
+			}
+		}
+		else if (simulationMethod == 3)
+		{
+			const unsigned int offset = model->getTriangleModels()[cm]->getIndexOffset();
+			PBD::TriangleModel::ParticleMesh& mesh = model->getTriangleModels()[cm]->getParticleMesh();
+			const unsigned int* tris = mesh.getFaces().data();
+			const unsigned int nFaces = mesh.numFaces();
+			for (unsigned int i = 0; i < nFaces; i++)
+			{
+				const unsigned int v1 = tris[3 * i] + offset;
+				const unsigned int v2 = tris[3 * i + 1] + offset;
+				const unsigned int v3 = tris[3 * i + 2] + offset;
+				model->addStrainTriangleConstraint(v1, v2, v3);
+			}
+		}
+		if (bendingMethod != 0)
+		{
+			const unsigned int offset = model->getTriangleModels()[cm]->getIndexOffset();
+			PBD::TriangleModel::ParticleMesh& mesh = model->getTriangleModels()[cm]->getParticleMesh();
+			unsigned int nEdges = mesh.numEdges();
+			const PBD::TriangleModel::ParticleMesh::Edge* edges = mesh.getEdges().data();
+			const unsigned int* tris = mesh.getFaces().data();
+			for (unsigned int i = 0; i < nEdges; i++)
+			{
+				const int tri1 = edges[i].m_face[0];
+				const int tri2 = edges[i].m_face[1];
+				if ((tri1 != 0xffffffff) && (tri2 != 0xffffffff))
+				{
+					// Find the triangle points which do not lie on the axis
+					const int axisPoint1 = edges[i].m_vert[0];
+					const int axisPoint2 = edges[i].m_vert[1];
+					int point1 = -1;
+					int point2 = -1;
+					for (int j = 0; j < 3; j++)
+					{
+						if ((tris[3 * tri1 + j] != axisPoint1) && (tris[3 * tri1 + j] != axisPoint2))
+						{
+							point1 = tris[3 * tri1 + j];
+							break;
+						}
+					}
+					for (int j = 0; j < 3; j++)
+					{
+						if ((tris[3 * tri2 + j] != axisPoint1) && (tris[3 * tri2 + j] != axisPoint2))
+						{
+							point2 = tris[3 * tri2 + j];
+							break;
+						}
+					}
+					if ((point1 != -1) && (point2 != -1))
+					{
+						const unsigned int vertex1 = point1 + offset;
+						const unsigned int vertex2 = point2 + offset;
+						const unsigned int vertex3 = edges[i].m_vert[0] + offset;
+						const unsigned int vertex4 = edges[i].m_vert[1] + offset;
+						if (bendingMethod == 1)
+							model->addDihedralConstraint(vertex1, vertex2, vertex3, vertex4);
+						else if (bendingMethod == 2)
+							model->addIsometricBendingConstraint(vertex1, vertex2, vertex3, vertex4);
+					}
+				}
+			}
+		}
+	}
+
+	PBD::SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
+	PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	for (unsigned int i = 0; i < tm.size(); i++)
+	{
+		const unsigned int nVert = tm[i]->getParticleMesh().numVertices();
+		unsigned int offset = tm[i]->getIndexOffset();
+		tm[i]->setFrictionCoeff(static_cast<Real>(0.1));
+		cd.addCollisionObjectWithoutGeometry(i, PBD::CollisionDetection::CollisionObject::TriangleModelCollisionObjectType, &pd.getPosition(offset), nVert, true);
+	}
+
+	LOG_INFO << "Number of triangles: " << nIndices / 3;
+	LOG_INFO << "Number of vertices: " << nRows * nCols;
+
+}
+
+void ImguiManager::createTorus()
+{
+	addRigidbody(torus);
+}
+
 void ImguiManager::createLeftSideMenu()
 {
-	
-	if (ImGui::Begin("Scene Hierarchy"))
+	if (ImGui::Begin("Scene Hierarchy", NULL, window_flags))
 	{
 		ImGui::SetWindowPos(ImVec2(0, 20));
-		ImGui::SetWindowSize(ImVec2(130, 837), 0);
-		//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
-		//ImGui::BeginDockspace();
+		ImGui::SetWindowSize(ImVec2(180, 837), 0);
 
-		// left Menu
-		//if (ImGui::BeginDock("Project Files"))
+		static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+		static bool align_label_with_current_x_position = false;
+		static bool test_drag_and_drop = false;
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Cube"))
 		{
-			//ImGui::SetWindowPos(ImVec2(0, 20));
-			//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
-
-			if (m_filetree_double_clicked_item != "")
+			ImGui::SameLine(120, 0);
+			if (ImGui::SmallButton("create"))
 			{
-				m_filetree_double_clicked_item = "(" + std::to_string(m_filetree_num) + ")" + m_filetree_double_clicked_item;
-				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, m_filetree_num++));
-				m_filetreeitems.push_back(m_filetree_double_clicked_item);
-				std::cout << m_filetree_double_clicked_item << std::endl;
-				m_filetree_double_clicked_item = "";
+				if (nCube < 10)
+				{
+					addRigidbody(cube);
+					PBD::Simulation::switchCurrent();
+					addRigidbody(cube);
+					PBD::Simulation::switchCurrent();
+
+					nCube += 1;
+					std::string name = "(" + std::to_string(nCube) + ")" + "cube";
+					
+					m_map_filetree_rigidbody.insert(std::make_pair(name, m_rigidbody_num++));
+					m_cube_tree_items.push_back(name);
+				}
+				else
+				{
+					// message 출력
+				}
 			}
 
-			for (int n = 0; n < m_filetreeitems.size(); n++)
+			for (int n = 0; n < m_cube_tree_items.size(); n++)
 			{
 				ImGui::PushID(n);
-				const bool is_selected = (m_filetreeitem_current_idx == n);
-				if (ImGui::Selectable(m_filetreeitems[n].c_str(), is_selected)) {
-					if (n != m_filetreeitem_current_idx)
-					{
-						m_filetree_current_item = m_filetreeitems[n];
-						m_filetreeitem_current_idx = n;
-					}
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == cube);
+				if (ImGui::Selectable(m_cube_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_cube_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = cube;
 				}
 
 				if (is_selected)
 					ImGui::SetItemDefaultFocus();
 				ImGui::PopID();
 			}
+			ImGui::TreePop();
 		}
-		//ImGui::EndDock();
-		
-		//ImGui::EndDockspace();
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Cylinder"))
+		{
+			ImGui::SameLine(120,0);
+			if (ImGui::SmallButton("create"))
+			{
+				if (nCylinder < 10)
+				{
+					addRigidbody(cylinder);
+					PBD::Simulation::switchCurrent();
+					addRigidbody(cylinder);
+					PBD::Simulation::switchCurrent();
+
+					nCylinder += 1;
+					std::string name = "(" + std::to_string(nCylinder) + ")" + "cylinder";
+
+					m_map_filetree_rigidbody.insert(std::make_pair(name, m_rigidbody_num++));
+					m_cylinder_tree_items.push_back(name);
+				}
+				else
+				{
+					// message 출력
+				}
+			}
+
+			for (int n = 0; n < m_cylinder_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == cylinder);
+				if (ImGui::Selectable(m_cylinder_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_cylinder_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = cylinder;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Sphere"))
+		{
+			ImGui::SameLine(120, 0);
+			if (ImGui::SmallButton("create")) 
+			{
+				if (nSphere < 10)
+				{
+					addRigidbody(sphere);
+					PBD::Simulation::switchCurrent();
+					addRigidbody(sphere);
+					PBD::Simulation::switchCurrent();
+
+					nSphere += 1;
+					std::string name = "(" + std::to_string(nSphere) + ")" + "sphere";
+
+					m_map_filetree_rigidbody.insert(std::make_pair(name, m_rigidbody_num++));
+					m_sphere_tree_items.push_back(name);
+				}
+				else
+				{
+					// message 출력
+				}
+			}
+
+			for (int n = 0; n < m_sphere_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == sphere);
+				if (ImGui::Selectable(m_sphere_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_sphere_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = sphere;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Cloth"))
+		{
+			ImGui::SameLine(120, 0);
+			if (ImGui::SmallButton("create")) 
+			{
+				if (nCloth == 0)
+				{
+					createMesh();
+					PBD::Simulation::switchCurrent();
+					createMesh();
+					PBD::Simulation::switchCurrent();
+
+					nCloth += 1;
+					m_cloth_tree_items.push_back("(" + std::to_string(nCloth) + ")" + "cloth");
+				}
+				else
+				{
+					// message 출력
+				}
+			}
+
+			for (int n = 0; n < m_cloth_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == cloth);
+				if (ImGui::Selectable(m_cloth_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_cloth_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = cloth;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Torus"))
+		{
+			ImGui::SameLine(120, 0);
+			if (ImGui::SmallButton("create"))
+			{
+				if (nTorus == 0)
+				{
+					addRigidbody(torus);
+					PBD::Simulation::switchCurrent();
+					addRigidbody(torus);
+					PBD::Simulation::switchCurrent();
+
+					nTorus += 1;
+					std::string name = "(" + std::to_string(nTorus) + ")" + "torus";
+
+					m_map_filetree_rigidbody.insert(std::make_pair(name, m_rigidbody_num++));
+					m_torus_tree_items.push_back(name);
+				}
+				else
+				{
+					// message 출력
+				}
+			}
+
+			for (int n = 0; n < m_torus_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == torus);
+				if (ImGui::Selectable(m_torus_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_torus_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = torus;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Custom"))
+		{
+			if (m_filetree_double_clicked_item != "")
+			{
+				nCustom += 1;
+				m_filetree_double_clicked_item = "(" + std::to_string(nCustom) + ")" + m_filetree_double_clicked_item;
+				m_map_filetree_rigidbody.insert(std::make_pair(m_filetree_double_clicked_item, m_rigidbody_num++));
+				m_custom_tree_items.push_back(m_filetree_double_clicked_item);
+				std::cout << m_filetree_double_clicked_item << std::endl;
+				m_filetree_double_clicked_item = "";
+			}
+
+			for (int n = 0; n < m_custom_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == custom);
+				if (ImGui::Selectable(m_custom_tree_items[n].c_str(), is_selected)) 
+				{
+					m_filetree_current_item = m_custom_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = custom;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+		//if (ImGui::TreeNode("Cube"))
+		//{
+
+		//	if (align_label_with_current_x_position)
+		//		ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+
+		//	// 'selection_mask' is dumb representation of what may be user-side selection state.
+		//	//  You may retain selection state inside or outside your objects in whatever format you see fit.
+		//	// 'node_clicked' is temporary storage of what node we have clicked to process selection at the end
+		//	/// of the loop. May be a pointer to your own node type, etc.
+		//	static int selection_mask = (1 << 2);
+		//	int node_clicked = -1;
+		//	for (int i = 0; i < 6; i++)
+		//	{
+		//		// Disable the default "open on single-click behavior" + set Selected flag according to our selection.
+		//		ImGuiTreeNodeFlags node_flags = base_flags;
+		//		const bool is_selected = (selection_mask & (1 << i)) != 0;
+		//		if (is_selected)
+		//			node_flags |= ImGuiTreeNodeFlags_Selected;
+		//		if (i < 3)
+		//		{
+		//			// Items 0..2 are Tree Node
+		//			bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Node %d", i);
+		//			if (ImGui::IsItemClicked())
+		//				node_clicked = i;
+		//			if (test_drag_and_drop && ImGui::BeginDragDropSource())
+		//			{
+		//				ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+		//				ImGui::Text("This is a drag and drop source");
+		//				ImGui::EndDragDropSource();
+		//			}
+		//			if (node_open)
+		//			{
+		//				ImGui::BulletText("Blah blah\nBlah Blah");
+		//				ImGui::TreePop();
+		//			}
+		//		}
+		//		else
+		//		{
+		//			// Items 3..5 are Tree Leaves
+		//			// The only reason we use TreeNode at all is to allow selection of the leaf. Otherwise we can
+		//			// use BulletText() or advance the cursor by GetTreeNodeToLabelSpacing() and call Text().
+		//			node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen; // ImGuiTreeNodeFlags_Bullet
+		//			ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Leaf %d", i);
+		//			if (ImGui::IsItemClicked())
+		//				node_clicked = i;
+		//			if (test_drag_and_drop && ImGui::BeginDragDropSource())
+		//			{
+		//				ImGui::SetDragDropPayload("_TREENODE", NULL, 0);
+		//				ImGui::Text("This is a drag and drop source");
+		//				ImGui::EndDragDropSource();
+		//			}
+		//		}
+		//	}
+		//	if (node_clicked != -1)
+		//	{
+		//		// Update selection state
+		//		// (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
+		//		if (ImGui::GetIO().KeyCtrl)
+		//			selection_mask ^= (1 << node_clicked);          // CTRL+click to toggle
+		//		else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
+		//			selection_mask = (1 << node_clicked);           // Click to single-select
+		//	}
+		//	if (align_label_with_current_x_position)
+		//		ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
+		//	ImGui::TreePop();
+		//}
+		//ImGui::TreePop();
+		// left Menu
+		//if (ImGui::BeginDock("Project Files"))
+	
+		//ImGui::SetWindowPos(ImVec2(0, 20));
+		//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
 	}
 	ImGui::End();
 }
@@ -228,17 +728,18 @@ void ImguiManager::createLeftSideMenu()
 void ImguiManager::createRightSideMenu()
 {
 
-	if (ImGui::Begin("Properties"))
+	if (ImGui::Begin("Properties", NULL, window_flags))
 	{
-		ImGui::SetWindowPos(ImVec2(130 + 2 * m_w / 2.5, 20 + 467));
-		ImGui::SetWindowSize(ImVec2(254, 370));
+		ImGui::SetWindowPos(ImVec2(180 + 2 * m_w / 2.5, 20 + 467));
+		ImGui::SetWindowSize(ImVec2(204, 370));
 		//ImGui::SetWindowSize(ImVec2(m_w / 6, m_h / 3 * 2));
 		//ImGui::SetWindowPos(ImVec2(m_w / 6 * 4, 20));
 		//ImGui::SetWindowSize(ImVec2(m_w / 6 * 2, m_h / 3 * 2), 0);
 		if (ImGui::BeginTabBar("right"))
 		{
 
-			if (strcmp(m_filetree_current_item.c_str(), "(1)torus.obj") == 0)
+			ImGui::PushItemWidth(ImGui::GetFontSize() * 8);
+			if (strcmp(m_filetree_current_item.c_str(), "(1)torus") == 0)
 			{
 				static bool test1 = true;
 				ImGui::Checkbox("Collision", &test1);
@@ -248,8 +749,17 @@ void ImguiManager::createRightSideMenu()
 				ImGui::Checkbox("Static", &test3);
 				ImGui::EndTabBar();
 			}
-
-			else if (std::filesystem::path(m_filetree_current_item).extension() == ".obj")
+			else if (strcmp(m_filetree_current_item.c_str(), "(1)cloth") == 0)
+			{
+				static bool test1 = true;
+				ImGui::Checkbox("Collision", &test1);
+				static bool test2 = true;
+				ImGui::Checkbox("Visible", &test2);
+				static bool test3 = true;
+				ImGui::Checkbox("Static", &test3);
+				ImGui::EndTabBar();
+			}
+			else if (std::filesystem::path(m_filetree_current_item).extension() == ".obj" || (which_tree >= 0 && which_tree <= 2))
 			{
 				int n = m_map_filetree_rigidbody.find(m_filetree_current_item)->second;
 				static bool test1 = true;
@@ -414,7 +924,7 @@ void ImguiManager::createRightSideMenu()
 
 void ImguiManager::createCenterMenu()
 {
-	ImGui::Begin("center");
+	ImGui::Begin("center", NULL, window_flags);
 	ImGui::SetWindowPos(ImVec2(m_w / 6, 20));
 	ImGui::SetWindowSize(ImVec2(m_w / 6 * 3, m_h / 3 * 2), 0);
 	if (ImGui::BeginTabBar("center"))
@@ -427,15 +937,15 @@ void ImguiManager::createCenterMenu()
 
 void ImguiManager::createBottomMenu()
 {
-	if (ImGui::Begin("Message"))
+	if (ImGui::Begin("Message", NULL, window_flags))
 	{
-		ImGui::SetWindowPos(ImVec2(130, m_h / 2.5 + 275));
+		ImGui::SetWindowPos(ImVec2(180, m_h / 2.5 + 275));
 		ImGui::SetWindowSize(ImVec2(2 * m_w / 2.5, 150));
 
 	}
 	ImGui::End();
 
-	ImGui::Begin("Files");
+	ImGui::Begin("Files", NULL, window_flags);
 	ImGui::SetWindowPos(ImVec2(0, m_h / 2.5 + 425));
 	ImGui::SetWindowSize(ImVec2(m_w, 223));
 	if (ImGui::BeginTabBar("bottom"))
@@ -489,6 +999,7 @@ void ImguiManager::createFileDialogBtn()
 	}
 }
 
+// using file name
 void ImguiManager::addRigidbody(std::string fName)
 {
 	std::string fileName = Utilities::FileSystem::normalizePath(fName);
@@ -513,6 +1024,115 @@ void ImguiManager::addRigidbody(std::string fName)
 	PBD::DistanceFieldCollisionDetection &cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
 	cd.addCollisionBox(rb.size()-1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(5.0, 5.0, 5.0));
 
+}
+
+// using tree type
+void ImguiManager::addRigidbody(treetype tree)
+{
+	std::string fileName;
+
+	switch (tree)
+	{
+	case cube:
+		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/cube.obj");
+		break;
+	case cylinder:
+		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/cylinder.obj");
+		break;
+	case sphere:
+		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/sphere.obj");
+		break;
+	case cloth:
+		break;
+	case torus:
+		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/torus.obj");
+		break;
+	case custom:
+		break;
+	default:
+		break;
+	}
+	Utilities::IndexedFaceMesh mesh;
+	PBD::VertexData vd;
+	loadObj(fileName, vd, mesh, Vector3r::Ones());
+
+	PBD::SimulationModel* model = PBD::Simulation::getCurrent()->getModel();
+	PBD::SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
+
+	PBD::RigidBody* n_rigidbody = new PBD::RigidBody();
+
+	switch (tree)
+	{
+	case cube:
+		n_rigidbody->initBody(1.0,
+			Vector3r(5.0, -1.5, 5.0),
+			Quaternionr(1.0, 0.0, 0.0, 0.0),
+			vd, mesh,
+			Vector3r(2.0, 2.0, 2.0));
+		n_rigidbody->setMass(1.0);
+		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
+		break;
+	case cylinder:
+		n_rigidbody->initBody(1.0,
+			Vector3r(5.0, -1.5, 5.0),
+			Quaternionr(1.0, 0.0, 0.0, 0.0),
+			vd, mesh,
+			Vector3r(2.0, 4.0, 2.0));
+		n_rigidbody->setMass(1.0);
+		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
+		break;
+	case sphere:
+		n_rigidbody->initBody(1.0,
+			Vector3r(5.0, -1.5, 5.0),
+			Quaternionr(1.0, 0.0, 0.0, 0.0),
+			vd, mesh,
+			Vector3r(2.0, 2.0, 2.0));
+		n_rigidbody->setMass(1.0);
+		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
+		break;
+	case cloth:
+		break;
+	case torus:
+		n_rigidbody->initBody(1.0,
+			Vector3r(5.0, -1.5, 5.0),
+			Quaternionr(1.0, 0.0, 0.0, 0.0),
+			vd, mesh,
+			Vector3r(2.0, 2.0, 2.0));
+		n_rigidbody->setMass(0.0);
+		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
+		break;
+	case custom:
+		break;
+	default:
+		break;
+	}
+
+	rb.push_back(n_rigidbody);
+
+	const std::vector<Vector3r>* vertices = rb.back()->getGeometry().getVertexDataLocal().getVertices();
+	const unsigned int nVert = static_cast<unsigned int>(vertices->size());
+	PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	switch (tree)
+	{
+	case cube:
+		cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(2.0, 2.0, 2.0));
+		break;
+	case cylinder:
+		cd.addCollisionCylinder(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector2r(2.0, 4.0));
+		break;
+	case sphere:
+		cd.addCollisionSphere(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, 2);
+		break;
+	case cloth:
+		break;
+	case torus:
+		cd.addCollisionTorus(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector2r(2.0, 1.0));
+		break;
+	case custom:
+		break;
+	default:
+		break;
+	}
 }
 
 void ImguiManager::ItemRowsBackground(float lineHeight, const ImColor& color)
