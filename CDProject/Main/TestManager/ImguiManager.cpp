@@ -1049,7 +1049,7 @@ void ImguiManager::createBottomMenu()
 	{
 		ImGui::SetWindowPos(ImVec2(180, m_h / 2.5 + 275));
 		ImGui::SetWindowSize(ImVec2(2 * m_w / 2.5, 150));
-
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 	}
 	ImGui::End();
 
