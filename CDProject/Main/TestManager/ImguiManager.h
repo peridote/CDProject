@@ -26,6 +26,7 @@
 #include "Utils/FileSystem.h"
 #include "Simulation/Simulation.h"
 #include "Simulation/DistanceFieldCollisionDetection.h"
+#include "Simulation/Liu13_ClothModel.h"
 
 #define BIT(x) (1 << x)
 #define PI std::atan(1.0)*4
@@ -71,7 +72,6 @@ public:
 	static int m_key_count;
 
 	Eigen::Vector3f translation;
-
 
 	/// ImPlot
 	struct ScrollingBuffer {
@@ -146,6 +146,7 @@ public:
 	void draw();
 
 	void createMesh();
+	void createLiuMesh();
 	void createTorus();
 };
 #endif

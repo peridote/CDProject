@@ -39,6 +39,7 @@ namespace PBD
 		virtual ~TimeStep(void);
 
 		virtual void step(SimulationModel &model) = 0;
+		virtual void steps() = 0;
 		virtual void reset();
 
 		virtual void init();

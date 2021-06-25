@@ -17,6 +17,7 @@
 #include "Simulation/Simulation.h"
 #include "TestManager/ImguiManager.h"
 
+Liu13_ClothModel a;
 // Enable memory leak detection
 #if defined(_DEBUG) && !defined(EIGEN_ALIGN)
 #define new DEBUG_NEW 
@@ -76,21 +77,28 @@ int main(int argc, char** argv)
 	SimulationModel* model = new SimulationModel();
 	model->init();
 	Simulation::getCurrent()->setModel(model);
-	buildModel();
-	initParameters();
-	Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { reset(); initParameters(); base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	//Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
+	//buildModel();
+	//initParameters();
+	//Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	Simulation::getCurrent()->setSimulationMethod(static_cast<int>(SimulationMethods::PBD));
 	Simulation::switchCurrent();
 
 	SimulationModel* model2 = new SimulationModel();
 	model2->init();
 	Simulation::getCurrent()->setModel(model2);
-	buildModel2();
-	initParameters();
-	Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { reset(); initParameters(); base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	//Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model2, &cd2);
+	//buildModel2();
+	//initParameters();
+	//Simulation::getCurrent()->setSimulationMethodChangedCallback([&]() { base->getSceneLoader()->readParameterObject(Simulation::getCurrent()->getTimeStep()); });
+	Simulation::getCurrent()->setSimulationMethod(static_cast<int>(SimulationMethods::TEST));
 	Simulation::switchCurrent();
 
+	Simulation::m_simul1->getTimeStep()->setCollisionDetection(*Simulation::m_simul1->getModel(), &cd);
+	Simulation::m_simul2->getTimeStep2()->setCollisionDetection(*Simulation::m_simul2->getModel(), &cd2);
+
 	//// OpenGL
-	MiniGL::setClientIdleFunc(50, timeStep);
+	//MiniGL::setClientIdleFunc(50, timeStep);
 	MiniGL::setKeyFunc(0, 'r', reset);
 
 	MiniGL::setClientSceneFunc(render);
@@ -399,11 +407,18 @@ void reset(ImguiManager* im, unsigned int n)
 	Utilities::Timing::printAverageTimes();
 	Utilities::Timing::reset();
 
-	Simulation::getCurrent()->reset();
+	//Simulation::getCurrent()->reset();
+	Simulation::m_simul1->reset();
+	Simulation::m_simul2->reset();
 	base->getSelectedParticles().clear();
 
-	Simulation::getCurrent()->getModel()->cleanup();
-	Simulation::getCurrent()->getTimeStep()->getCollisionDetection()->cleanup();
+	//Simulation::getCurrent()->getModel()->cleanup();
+	Simulation::m_simul1->getModel()->cleanup();
+	Simulation::m_simul2->getModel()->cleanup();
+	
+		Simulation::m_simul1->getTimeStep()->getCollisionDetection()->cleanup();
+	
+		Simulation::m_simul2->getTimeStep2()->getCollisionDetection()->cleanup();
 	
 	switch (n)
 	{
@@ -422,20 +437,23 @@ void reset(ImguiManager* im, unsigned int n)
 
 void reset()
 {
-	Utilities::Timing::printAverageTimes();
-	Utilities::Timing::reset();
+	//Utilities::Timing::printAverageTimes();
+	//Utilities::Timing::reset();
 
-	Simulation::getCurrent()->reset();
-	base->getSelectedParticles().clear();
+	//Simulation::getCurrent()->reset();
+	//base->getSelectedParticles().clear();
 
-	Simulation::getCurrent()->getModel()->cleanup();
-	Simulation::getCurrent()->getTimeStep()->getCollisionDetection()->cleanup();
+	//Simulation::getCurrent()->getModel()->cleanup();
+	////Simulation::getCurrent()->getTimeStep()->getCollisionDetection()->cleanup();
 
-	buildModel();
+	//buildModel();
 }
 
 void timeStep()
 {
+	/*Simulation::m_simul1->getTimeStep()->setCollisionDetection(*Simulation::m_simul1->getModel(), &cd);
+	Simulation::m_simul2->getTimeStep2()->setCollisionDetection(*Simulation::m_simul2->getModel(), &cd2);*/
+
 	const Real pauseAt = base->getValue<Real>(DemoBase::PAUSE_AT);
 	if ((pauseAt > 0.0) && (pauseAt < TimeManager::getCurrent()->getTime()))
 		base->setValue(DemoBase::PAUSE, true);
@@ -444,12 +462,19 @@ void timeStep()
 		return;
 
 	// Simulation code
-	SimulationModel* model = Simulation::getCurrent()->getModel();
+	Simulation* current = Simulation::getCurrent();
+	SimulationModel* model = current->getModel();
 	const unsigned int numSteps = base->getValue<unsigned int>(DemoBase::NUM_STEPS_PER_RENDER);
 	for (unsigned int i = 0; i < numSteps; i++)
 	{
 		START_TIMING("SimStep");
-		Simulation::getCurrent()->getTimeStep()->step(*model);
+		
+		if (current == Simulation::m_simul1) {
+			current->getTimeStep()->steps();
+		}
+		else if (current == Simulation::m_simul2) {
+			current->getTimeStep2()->steps();
+		}
 		STOP_TIMING_AVG;
 
 		exportOBJ();
@@ -532,7 +557,12 @@ void buildModel()
 		Vector3r(100.0, 1.0, 100.0));
 	rb[0]->setMass(0.0);
 
-	Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
+	Simulation* simulation = Simulation::getCurrent();
+	if (simulation == Simulation::m_simul1) {
+		Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
+	} else if (simulation == Simulation::m_simul2) {
+		Simulation::getCurrent()->getTimeStep2()->setCollisionDetection(*model, &cd2);
+	}
 	
 	cd.setTolerance(static_cast<Real>(0.05));
 
@@ -575,7 +605,13 @@ void buildModel2()
 		Vector3r(100.0, 1.0, 100.0));
 	rb[0]->setMass(0.0);
 
-	Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd2);
+	Simulation* simulation = Simulation::getCurrent();
+	if (simulation == Simulation::m_simul1) {
+		Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
+	}
+	else if (simulation == Simulation::m_simul2) {
+		Simulation::getCurrent()->getTimeStep2()->setCollisionDetection(*model, &cd2);
+	}
 
 	cd2.setTolerance(static_cast<Real>(0.05));
 

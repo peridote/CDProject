@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Liu13_ClothModel.cpp" />
     <ClCompile Include="Common\DemoBase.cpp" />
     <ClCompile Include="Common\TweakBarParameters.cpp" />
     <ClCompile Include="extern\AntTweakBar\src\LoadOGL.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="Visualization\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Liu13_ClothModel.h" />
     <ClInclude Include="Common\DemoBase.h" />
     <ClInclude Include="Common\TweakBarParameters.h" />
     <ClInclude Include="extern\AntTweakBar\include\AntTweakBar.h" />
