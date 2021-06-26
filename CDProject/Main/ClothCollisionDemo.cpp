@@ -351,7 +351,7 @@ int main(int argc, char** argv)
 		}
 		ImGui::End();
 
-		/*static std::vector<float> v = { 1 };
+;		/*static std::vector<float> v = { 1 };
 		static float i = 0;
 		v.push_back(i++);
 		float* x_data = &v[0];
@@ -374,15 +374,6 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
-//void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-//{
-//	if (key = GLFW_KEY_SPACE)
-//	{
-//		std::cout << "space pressed" << std::endl;
-//	}
-//}
-
 
 void initParameters()
 {
