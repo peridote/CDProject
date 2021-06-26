@@ -375,6 +375,14 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+//void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+//{
+//	if (key = GLFW_KEY_SPACE)
+//	{
+//		std::cout << "space pressed" << std::endl;
+//	}
+//}
+
 
 void initParameters()
 {

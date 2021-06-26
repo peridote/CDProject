@@ -20,7 +20,7 @@ class Liu13_ClothModel : public TriangleModel
 			Springtype type;
 		};
 
-		typedef Eigen::SparseMatrix<Real> SparseMatrix;
+		typedef Eigen::SparseMatrix<double> SparseMatrix;
 		typedef Eigen::Triplet<Real> Triplet;
 		typedef Edge Spring;
 
@@ -38,8 +38,10 @@ class Liu13_ClothModel : public TriangleModel
 		Eigen::VectorXd m_b;
 		std::vector<Real> m_restLength;
 		std::vector<Spring> m_springs;
-		Eigen::SimplicialCholesky<Eigen::SparseMatrix<Real>> solver;
+		Eigen::SimplicialCholesky<Eigen::SparseMatrix<double>> solver;
 		std::set<unsigned int> m_fixed_points;
+
+		int size;
 
 	public:
 		void getPositionVector(ParticleData& pd);
