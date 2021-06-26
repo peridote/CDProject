@@ -19,6 +19,7 @@ int nSphere = 0;
 int nCylinder = 0;
 int nCube = 0;
 int nCustom = 0;
+int direction = 0;
 
 ImguiManager::ImguiManager()
 {
@@ -144,6 +145,7 @@ void ImguiManager::Initialize(GLFWwindow* window)
 void ImguiManager::StartFrame()
 {
 	glfwPollEvents();
+	//glfwSetKeyCallback(m_window, keyCallback);
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -902,6 +904,29 @@ void ImguiManager::createRightSideMenu()
 				static float prev_rb_rot_y = 0.0f;
 				static float prev_rb_rot_z = 0.0f;
 
+				for (int l = 0; l < IM_ARRAYSIZE(ImGui::GetIO().KeysDown); l++) {
+					if (l == ImGui::GetKeyIndex(ImGuiKey_LeftArrow) && ImGui::IsKeyPressed(l))
+					{
+						printf("left\n");
+						rb_trans_x -= 0.1f;
+					}
+					else if (l == ImGui::GetKeyIndex(ImGuiKey_RightArrow) && ImGui::IsKeyPressed(l))
+					{
+						printf("right\n");
+						rb_trans_x += 0.1f;
+
+					}
+					else if (l == ImGui::GetKeyIndex(ImGuiKey_UpArrow) && ImGui::IsKeyPressed(l))
+					{
+						printf("up\n");
+						rb_trans_y += 0.1f;
+					}
+					else if (l == ImGui::GetKeyIndex(ImGuiKey_DownArrow) && ImGui::IsKeyPressed(l))
+					{
+						printf("down\n");
+						rb_trans_y -= 0.1f;
+					}
+				}
 
 				ImGui::SliderFloat("rb_trans_x", &rb_trans_x, -5.0f, 5.0f);
 				ImGui::SliderFloat("rb_trans_y", &rb_trans_y, -5.0f, 5.0f);
