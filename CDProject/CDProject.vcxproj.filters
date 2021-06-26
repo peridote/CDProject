@@ -195,6 +195,9 @@
     <ClCompile Include="extern\AntTweakBar\src\TwPrecomp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Liu13_ClothModel.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\FileSystem.h">
@@ -1374,6 +1377,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="extern\GLFW\glfw3native.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Liu13_ClothModel.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,6 +5,8 @@
 #include <iostream>
 #include "PositionBasedDynamics/PositionBasedDynamics.h"
 #include "Utils/Timing.h"
+#include "Simulation/Liu13_ClothModel.h"
+
 
 using namespace PBD;
 using namespace std;
@@ -20,7 +22,7 @@ int TimeStepController::ENUM_VUPDATE_FIRST_ORDER = -1;
 int TimeStepController::ENUM_VUPDATE_SECOND_ORDER = -1;
 
 
-TimeStepController::TimeStepController() 
+TimeStepController::TimeStepController(Simulation *simulation) 
 {
 	m_velocityUpdateMethod = 0;
 	m_iterations = 0;
@@ -29,6 +31,7 @@ TimeStepController::TimeStepController()
 	m_maxIterationsV = 5;
 	m_subSteps = 5;
 	m_collisionDetection = NULL;	
+	m_simulation = simulation;
 }
 
 TimeStepController::~TimeStepController(void)
@@ -70,6 +73,73 @@ void TimeStepController::initParameters()
 	EnumParameter* enumParam = static_cast<EnumParameter*>(getParameter(VELOCITY_UPDATE_METHOD));
 	enumParam->addEnumValue("First Order Update", ENUM_VUPDATE_FIRST_ORDER);
 	enumParam->addEnumValue("Second Order Update", ENUM_VUPDATE_SECOND_ORDER);
+}
+
+void TimeStepController::step_liu(SimulationModel& model)
+{
+	START_TIMING("simulation step");
+	TimeManager* tm = TimeManager::getCurrent2();
+	const Real hOld = tm->getTimeStepSize();
+
+	Real h = hOld / (Real)m_subSteps;
+	h = 0.033;
+	tm->setTimeStepSize(h);
+	
+	Vector3r grav = Vector3r(0.0f, -9.81f, 0.0f);
+
+	ParticleData& pd = model.getParticles();
+	Liu13_ClothModel* tri = (Liu13_ClothModel*)model.getTriangleModels()[0];
+
+	tm->setTimeStepSize(h);
+	for (int i = 0; i < (int)pd.size(); i++)
+	{
+			pd.getVelocity(i) += pd.getMass(i) * grav;
+	}
+
+	tri->getForceVector(pd, h);
+	
+	for (unsigned int step = 0; step < m_subSteps; step++)
+	{
+		tri->localStep(pd);
+		tri->globalStep(pd, h);
+	}
+	
+	/*tri->setFixPoint(pd);
+	tri->fixOverSpring(pd, h * h);
+	tri->vectorToPosition(pd);*/
+	/*tri->collisionSphere(pd);
+	tri->fixedPointMovement(pd);*/
+
+	tm->setTime(tm->getTime() + h);
+	STOP_TIMING_AVG;
+}
+
+
+void TimeStepController::steps()
+{
+	SimulationMethods method = static_cast<SimulationMethods>(m_simulation->getCurrent()->getSimulationMethod());
+
+	if (method == SimulationMethods::PBD)
+	{
+		LOG_INFO << "PBD implemented.";
+		step(*m_simulation->getCurrent()->getModel());
+	} 
+	else if (method == SimulationMethods::XPBD)
+	{
+		LOG_INFO << "XPBD not implemented yet.";
+		//step(*m_simulation->getCurrent()->getModel());
+	}
+	else if (method == SimulationMethods::IBDS)
+	{
+		LOG_INFO << "IBDS not implemented yet.";
+	}
+	else if (method == SimulationMethods::TEST)
+	{
+		LOG_INFO << "TEST not implemented yet.";
+		step(*m_simulation->getCurrent()->getModel());
+		//step_liu(*m_simulation->getCurrent()->getModel());
+	}
+	
 }
 
 void TimeStepController::step(SimulationModel &model)

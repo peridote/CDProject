@@ -7,9 +7,10 @@ namespace PBD
 {
 	class TimeManager
 	{
-	private:
+	public:
 		Real time;
 		static TimeManager *current;
+		static TimeManager* current2;
 		Real h;
 
 	public:
@@ -18,6 +19,7 @@ namespace PBD
 
 		// Singleton
 		static TimeManager* getCurrent ();
+		static TimeManager* getCurrent2();
 		static void setCurrent (TimeManager* tm);
 		static bool hasCurrent();
 
