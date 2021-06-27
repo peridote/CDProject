@@ -109,6 +109,14 @@ namespace PBD
 
 			void resetContacts();
 
+			void addLiuModel(
+				const unsigned int nPoints,
+				const unsigned int nFaces,
+				Vector3r* points,
+				unsigned int* indices,
+				const TriangleModel::ParticleMesh::UVIndices& uvIndices,
+				const TriangleModel::ParticleMesh::UVs& uvs);
+
 			void addTriangleModel(
 				const unsigned int nPoints,
 				const unsigned int nFaces,

@@ -397,123 +397,248 @@ void DemoBase::render()
 		}
 	}
 
+	Simulation* simulation = Simulation::getCurrent();
+	if (simulation == Simulation::m_simul1) {
+		DistanceFieldCollisionDetection* cd = nullptr;
 
-	DistanceFieldCollisionDetection* cd = (DistanceFieldCollisionDetection*)Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
-	if (cd && (m_renderSDF || m_renderAABB || (m_renderBVHDepth >= 0) || (m_renderBVHDepthTets >= 0)))
-	{
-		std::vector<CollisionDetection::CollisionObject*>& collisionObjects = cd->getCollisionObjects();
-		for (unsigned int k = 0; k < collisionObjects.size(); k++)
+		cd = (DistanceFieldCollisionDetection*)Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+
+		if (cd && (m_renderSDF || m_renderAABB || (m_renderBVHDepth >= 0) || (m_renderBVHDepthTets >= 0)))
 		{
-			if (m_renderAABB)
-				renderAABB(collisionObjects[k]->m_aabb);
-
-			if (m_renderSDF)
-				renderSDF(collisionObjects[k]);
-
-			if (m_renderBVHDepth >= 0)
+			std::vector<CollisionDetection::CollisionObject*>& collisionObjects = cd->getCollisionObjects();
+			for (unsigned int k = 0; k < collisionObjects.size(); k++)
 			{
-				if (cd->isDistanceFieldCollisionObject(collisionObjects[k]))
-				{
-					const PointCloudBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvh;
+				if (m_renderAABB)
+					renderAABB(collisionObjects[k]->m_aabb);
 
-					std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepth; };
-					std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
+				if (m_renderSDF)
+					renderSDF(collisionObjects[k]);
+
+				if (m_renderBVHDepth >= 0)
+				{
+					if (cd->isDistanceFieldCollisionObject(collisionObjects[k]))
 					{
-						if (depth == m_renderBVHDepth)
+						const PointCloudBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvh;
+
+						std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepth; };
+						std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
 						{
-							const BoundingSphere& bs = bvh.hull(node_index);
-							if (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::RigidBodyCollisionObjectType)
+							if (depth == m_renderBVHDepth)
 							{
-								RigidBody* body = rb[collisionObjects[k]->m_bodyIndex];
-								const Vector3r& sphere_x = bs.x();
-								const Vector3r sphere_x_w = body->getRotation() * sphere_x + body->getPosition();
-								MiniGL::drawSphere(sphere_x_w, std::max((float)bs.r(), 0.05f), staticColor);
+								const BoundingSphere& bs = bvh.hull(node_index);
+								if (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::RigidBodyCollisionObjectType)
+								{
+									RigidBody* body = rb[collisionObjects[k]->m_bodyIndex];
+									const Vector3r& sphere_x = bs.x();
+									const Vector3r sphere_x_w = body->getRotation() * sphere_x + body->getPosition();
+									MiniGL::drawSphere(sphere_x_w, std::max((float)bs.r(), 0.05f), staticColor);
+								}
+								else
+									MiniGL::drawSphere(bs.x(), std::max((float)bs.r(), 0.05f), staticColor);
 							}
-							else
-								MiniGL::drawSphere(bs.x(), std::max((float)bs.r(), 0.05f), staticColor);
-						}
-					};
+						};
 
-					bvh.traverse_depth_first(predicate, cb);
+						bvh.traverse_depth_first(predicate, cb);
+					}
 				}
-			}
 
-			if (m_renderBVHDepthTets >= 0)
-			{
-				if (cd->isDistanceFieldCollisionObject(collisionObjects[k]) && (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::TetModelCollisionObjectType))
+				if (m_renderBVHDepthTets >= 0)
 				{
-
-					TetMeshBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvhTets;
-
-					std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepthTets; };
-					std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
+					if (cd->isDistanceFieldCollisionObject(collisionObjects[k]) && (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::TetModelCollisionObjectType))
 					{
-						if (depth == m_renderBVHDepthTets)
+
+						TetMeshBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvhTets;
+
+						std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepthTets; };
+						std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
 						{
-							const BoundingSphere& bs = bvh.hull(node_index);
-							const Vector3r& sphere_x = bs.x();
-							MiniGL::drawSphere(sphere_x, std::max((float)bs.r(), 0.05f), staticColor);
-						}
-					};
+							if (depth == m_renderBVHDepthTets)
+							{
+								const BoundingSphere& bs = bvh.hull(node_index);
+								const Vector3r& sphere_x = bs.x();
+								MiniGL::drawSphere(sphere_x, std::max((float)bs.r(), 0.05f), staticColor);
+							}
+						};
 
-					bvh.traverse_depth_first(predicate, cb);
+						bvh.traverse_depth_first(predicate, cb);
+					}
 				}
 			}
 		}
-	}
 
-	const Vector3r refOffset(0, 0, 0);
-	const ParticleData& pd = model->getParticles();
-	if (m_renderRefTets || m_renderTets)
-	{
-		shaderBegin(surfaceColor);
-
-		for (unsigned int i = 0; i < model->getTetModels().size(); i++)
+		const Vector3r refOffset(0, 0, 0);
+		const ParticleData& pd = model->getParticles();
+		if (m_renderRefTets || m_renderTets)
 		{
-			const IndexedTetMesh& mesh = model->getTetModels()[i]->getParticleMesh();
-			const unsigned int nTets = mesh.numTets();
-			const unsigned int* indices = mesh.getTets().data();
-			const unsigned int offset = model->getTetModels()[i]->getIndexOffset();
+			shaderBegin(surfaceColor);
 
-			const Vector3r& ix = model->getTetModels()[i]->getInitialX();
-			const Matrix3r& R = model->getTetModels()[i]->getInitialR();
-
-			for (unsigned int j = 0; j < nTets; j++)
+			for (unsigned int i = 0; i < model->getTetModels().size(); i++)
 			{
-				if (m_renderTets)
-				{
-					const Vector3r& x0 = pd.getPosition(indices[4 * j] + offset);
-					const Vector3r& x1 = pd.getPosition(indices[4 * j + 1] + offset);
-					const Vector3r& x2 = pd.getPosition(indices[4 * j + 2] + offset);
-					const Vector3r& x3 = pd.getPosition(indices[4 * j + 3] + offset);
-					MiniGL::drawTetrahedron(x0, x1, x2, x3, surfaceColor);
-				}
-				if (m_renderRefTets)
-				{
-					// 					const Vector3r &x0 = R.transpose() * (pd.getPosition0(indices[4 * j + 0] + offset) - ix);
-					// 					const Vector3r &x1 = R.transpose() * (pd.getPosition0(indices[4 * j + 1] + offset) - ix);
-					// 					const Vector3r &x2 = R.transpose() * (pd.getPosition0(indices[4 * j + 2] + offset) - ix);
-					// 					const Vector3r &x3 = R.transpose() * (pd.getPosition0(indices[4 * j + 3] + offset) - ix);
-					const Vector3r& x0 = pd.getPosition0(indices[4 * j] + offset) + refOffset;
-					const Vector3r& x1 = pd.getPosition0(indices[4 * j + 1] + offset) + refOffset;
-					const Vector3r& x2 = pd.getPosition0(indices[4 * j + 2] + offset) + refOffset;
-					const Vector3r& x3 = pd.getPosition0(indices[4 * j + 3] + offset) + refOffset;
+				const IndexedTetMesh& mesh = model->getTetModels()[i]->getParticleMesh();
+				const unsigned int nTets = mesh.numTets();
+				const unsigned int* indices = mesh.getTets().data();
+				const unsigned int offset = model->getTetModels()[i]->getIndexOffset();
 
-					MiniGL::drawTetrahedron(x0, x1, x2, x3, staticColor);
+				const Vector3r& ix = model->getTetModels()[i]->getInitialX();
+				const Matrix3r& R = model->getTetModels()[i]->getInitialR();
+
+				for (unsigned int j = 0; j < nTets; j++)
+				{
+					if (m_renderTets)
+					{
+						const Vector3r& x0 = pd.getPosition(indices[4 * j] + offset);
+						const Vector3r& x1 = pd.getPosition(indices[4 * j + 1] + offset);
+						const Vector3r& x2 = pd.getPosition(indices[4 * j + 2] + offset);
+						const Vector3r& x3 = pd.getPosition(indices[4 * j + 3] + offset);
+						MiniGL::drawTetrahedron(x0, x1, x2, x3, surfaceColor);
+					}
+					if (m_renderRefTets)
+					{
+						// 					const Vector3r &x0 = R.transpose() * (pd.getPosition0(indices[4 * j + 0] + offset) - ix);
+						// 					const Vector3r &x1 = R.transpose() * (pd.getPosition0(indices[4 * j + 1] + offset) - ix);
+						// 					const Vector3r &x2 = R.transpose() * (pd.getPosition0(indices[4 * j + 2] + offset) - ix);
+						// 					const Vector3r &x3 = R.transpose() * (pd.getPosition0(indices[4 * j + 3] + offset) - ix);
+						const Vector3r& x0 = pd.getPosition0(indices[4 * j] + offset) + refOffset;
+						const Vector3r& x1 = pd.getPosition0(indices[4 * j + 1] + offset) + refOffset;
+						const Vector3r& x2 = pd.getPosition0(indices[4 * j + 2] + offset) + refOffset;
+						const Vector3r& x3 = pd.getPosition0(indices[4 * j + 3] + offset) + refOffset;
+
+						MiniGL::drawTetrahedron(x0, x1, x2, x3, staticColor);
+					}
+				}
+			}
+			shaderEnd();
+		}
+
+		float red[4] = { 0.8f, 0.0f, 0.0f, 1 };
+		for (unsigned int j = 0; j < m_selectedParticles.size(); j++)
+		{
+			MiniGL::drawSphere(pd.getPosition(m_selectedParticles[j]), 0.08f, red);
+		}
+
+		MiniGL::drawTime(TimeManager::getCurrent()->getTime());
+	}
+
+	else if (simulation == Simulation::m_simul2) {
+		DistanceFieldCollisionDetection* cd2 = nullptr;
+
+		cd2 = (DistanceFieldCollisionDetection*)Simulation::getCurrent()->getTimeStep2()->getCollisionDetection();
+
+		if (cd2 && (m_renderSDF || m_renderAABB || (m_renderBVHDepth >= 0) || (m_renderBVHDepthTets >= 0)))
+		{
+			std::vector<CollisionDetection::CollisionObject*>& collisionObjects = cd2->getCollisionObjects();
+			for (unsigned int k = 0; k < collisionObjects.size(); k++)
+			{
+				if (m_renderAABB)
+					renderAABB(collisionObjects[k]->m_aabb);
+
+				if (m_renderSDF)
+					renderSDF(collisionObjects[k]);
+
+				if (m_renderBVHDepth >= 0)
+				{
+					if (cd2->isDistanceFieldCollisionObject(collisionObjects[k]))
+					{
+						const PointCloudBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvh;
+
+						std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepth; };
+						std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
+						{
+							if (depth == m_renderBVHDepth)
+							{
+								const BoundingSphere& bs = bvh.hull(node_index);
+								if (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::RigidBodyCollisionObjectType)
+								{
+									RigidBody* body = rb[collisionObjects[k]->m_bodyIndex];
+									const Vector3r& sphere_x = bs.x();
+									const Vector3r sphere_x_w = body->getRotation() * sphere_x + body->getPosition();
+									MiniGL::drawSphere(sphere_x_w, std::max((float)bs.r(), 0.05f), staticColor);
+								}
+								else
+									MiniGL::drawSphere(bs.x(), std::max((float)bs.r(), 0.05f), staticColor);
+							}
+						};
+
+						bvh.traverse_depth_first(predicate, cb);
+					}
+				}
+
+				if (m_renderBVHDepthTets >= 0)
+				{
+					if (cd2->isDistanceFieldCollisionObject(collisionObjects[k]) && (collisionObjects[k]->m_bodyType == CollisionDetection::CollisionObject::TetModelCollisionObjectType))
+					{
+
+						TetMeshBSH& bvh = ((DistanceFieldCollisionDetection::DistanceFieldCollisionObject*)collisionObjects[k])->m_bvhTets;
+
+						std::function<bool(unsigned int, unsigned int)> predicate = [&](unsigned int node_index, unsigned int depth) { return (int)depth <= m_renderBVHDepthTets; };
+						std::function<void(unsigned int, unsigned int)> cb = [&](unsigned int node_index, unsigned int depth)
+						{
+							if (depth == m_renderBVHDepthTets)
+							{
+								const BoundingSphere& bs = bvh.hull(node_index);
+								const Vector3r& sphere_x = bs.x();
+								MiniGL::drawSphere(sphere_x, std::max((float)bs.r(), 0.05f), staticColor);
+							}
+						};
+
+						bvh.traverse_depth_first(predicate, cb);
+					}
 				}
 			}
 		}
-		shaderEnd();
+
+		const Vector3r refOffset(0, 0, 0);
+		const ParticleData& pd = model->getParticles();
+		if (m_renderRefTets || m_renderTets)
+		{
+			shaderBegin(surfaceColor);
+
+			for (unsigned int i = 0; i < model->getTetModels().size(); i++)
+			{
+				const IndexedTetMesh& mesh = model->getTetModels()[i]->getParticleMesh();
+				const unsigned int nTets = mesh.numTets();
+				const unsigned int* indices = mesh.getTets().data();
+				const unsigned int offset = model->getTetModels()[i]->getIndexOffset();
+
+				const Vector3r& ix = model->getTetModels()[i]->getInitialX();
+				const Matrix3r& R = model->getTetModels()[i]->getInitialR();
+
+				for (unsigned int j = 0; j < nTets; j++)
+				{
+					if (m_renderTets)
+					{
+						const Vector3r& x0 = pd.getPosition(indices[4 * j] + offset);
+						const Vector3r& x1 = pd.getPosition(indices[4 * j + 1] + offset);
+						const Vector3r& x2 = pd.getPosition(indices[4 * j + 2] + offset);
+						const Vector3r& x3 = pd.getPosition(indices[4 * j + 3] + offset);
+						MiniGL::drawTetrahedron(x0, x1, x2, x3, surfaceColor);
+					}
+					if (m_renderRefTets)
+					{
+						// 					const Vector3r &x0 = R.transpose() * (pd.getPosition0(indices[4 * j + 0] + offset) - ix);
+						// 					const Vector3r &x1 = R.transpose() * (pd.getPosition0(indices[4 * j + 1] + offset) - ix);
+						// 					const Vector3r &x2 = R.transpose() * (pd.getPosition0(indices[4 * j + 2] + offset) - ix);
+						// 					const Vector3r &x3 = R.transpose() * (pd.getPosition0(indices[4 * j + 3] + offset) - ix);
+						const Vector3r& x0 = pd.getPosition0(indices[4 * j] + offset) + refOffset;
+						const Vector3r& x1 = pd.getPosition0(indices[4 * j + 1] + offset) + refOffset;
+						const Vector3r& x2 = pd.getPosition0(indices[4 * j + 2] + offset) + refOffset;
+						const Vector3r& x3 = pd.getPosition0(indices[4 * j + 3] + offset) + refOffset;
+
+						MiniGL::drawTetrahedron(x0, x1, x2, x3, staticColor);
+					}
+				}
+			}
+			shaderEnd();
+		}
+
+		float red[4] = { 0.8f, 0.0f, 0.0f, 1 };
+		for (unsigned int j = 0; j < m_selectedParticles.size(); j++)
+		{
+			MiniGL::drawSphere(pd.getPosition(m_selectedParticles[j]), 0.08f, red);
+		}
+
+		MiniGL::drawTime(TimeManager::getCurrent()->getTime());
 	}
-
-	float red[4] = { 0.8f, 0.0f, 0.0f, 1 };
-	for (unsigned int j = 0; j < m_selectedParticles.size(); j++)
-	{
-		MiniGL::drawSphere(pd.getPosition(m_selectedParticles[j]), 0.08f, red);
-	}
-
-	MiniGL::drawTime(TimeManager::getCurrent()->getTime());
-
 }
 
 void DemoBase::renderTriangleModels()

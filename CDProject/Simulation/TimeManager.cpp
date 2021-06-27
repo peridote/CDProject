@@ -3,6 +3,7 @@
 using namespace PBD;
 
 TimeManager* TimeManager::current = 0;
+TimeManager* TimeManager::current2 = 0;
 
 TimeManager::TimeManager () 
 {
@@ -13,6 +14,7 @@ TimeManager::TimeManager ()
 TimeManager::~TimeManager () 
 {
 	current = 0;
+	current2 = 0;
 }
 
 TimeManager* TimeManager::getCurrent ()
@@ -23,6 +25,16 @@ TimeManager* TimeManager::getCurrent ()
 	}
 	return current;
 }
+
+TimeManager* TimeManager::getCurrent2()
+{
+	if (current2 == 0)
+	{
+		current2 = new TimeManager();
+	}
+	return current2;
+}
+
 
 void TimeManager::setCurrent (TimeManager* tm)
 {

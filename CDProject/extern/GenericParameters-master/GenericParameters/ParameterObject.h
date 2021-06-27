@@ -8,6 +8,7 @@
 #include "VectorParameter.h"
 #include "FunctionParameter.h"
 
+
 namespace GenParam
 {
 	/** An object that uses generic parameters should be inherited from this class.

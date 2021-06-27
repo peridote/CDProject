@@ -9,7 +9,7 @@
 
 namespace PBD
 {
-	enum class SimulationMethods { PBD = 0, XPBD, IBDS, NumSimulationMethods };
+	enum class SimulationMethods { PBD = 0, XPBD, IBDS, TEST, NumSimulationMethods };
 
 	/** \brief Class to manage the current simulation time and the time step size. 
 	* This class is a singleton.
@@ -28,6 +28,7 @@ namespace PBD
 		SimulationModel *m_model;
 		SimulationMethods m_simulationMethod;
 		TimeStep *m_timeStep;
+		TimeStep* m_timeStep2;
 		Vector3r m_gravitation;
 		std::function<void()> m_simulationMethodChanged;
 
@@ -38,6 +39,10 @@ namespace PBD
 		static Simulation *current;
 
 	public:
+		static Simulation* m_simul1;
+		static Simulation* m_simul2;
+
+	public:
 		Simulation ();
 		~Simulation ();
 
@@ -46,6 +51,8 @@ namespace PBD
 
 		// Singleton
 		static Simulation* getCurrent ();
+		// switch current between m_simul1 and m_simul2
+		static void switchCurrent();
 		static void setCurrent (Simulation* tm);
 		static bool hasCurrent();
 
@@ -58,6 +65,7 @@ namespace PBD
 		void setSimulationMethodChangedCallback(std::function<void()> const& callBackFct);
 
 		TimeStep *getTimeStep() { return m_timeStep; }
+		TimeStep* getTimeStep2() { return m_timeStep2; }
 		void setTimeStep(TimeStep *ts) { m_timeStep = ts; }
 	};
 }

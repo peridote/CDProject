@@ -5,6 +5,7 @@
 #include "TimeStep.h"
 #include "SimulationModel.h"
 #include "CollisionDetection.h"
+#include "Simulation.h"
 
 namespace PBD
 {
@@ -28,18 +29,21 @@ namespace PBD
 		unsigned int m_subSteps;
 		unsigned int m_maxIterations;
 		unsigned int m_maxIterationsV;
+		Simulation* m_simulation;
 
 		virtual void initParameters();
 		
 		void positionConstraintProjection(SimulationModel &model);
 		void velocityConstraintProjection(SimulationModel &model);
+		void step_liu(SimulationModel& model);
 
 
 	public:
-		TimeStepController();
+		TimeStepController(Simulation* simulation);
 		virtual ~TimeStepController(void);
 
 		virtual void step(SimulationModel &model);
+		virtual void steps();
 		virtual void reset();
 	};
 }

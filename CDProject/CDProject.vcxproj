@@ -66,6 +66,7 @@
     <ClCompile Include="Simulation\DistanceFieldCollisionDetection.cpp" />
     <ClCompile Include="Simulation\IDFactory.cpp" />
     <ClCompile Include="Simulation\LineModel.cpp" />
+    <ClCompile Include="Simulation\Liu13_ClothModel.cpp" />
     <ClCompile Include="Simulation\NeighborhoodSearchSpatialHashing.cpp" />
     <ClCompile Include="Simulation\RigidBodyGeometry.cpp" />
     <ClCompile Include="Simulation\Simulation.cpp" />
@@ -89,6 +90,7 @@
     <ClCompile Include="Visualization\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\PositionBasedDynamics-master\Simulation\ParticleData.h" />
     <ClInclude Include="Common\DemoBase.h" />
     <ClInclude Include="Common\TweakBarParameters.h" />
     <ClInclude Include="extern\AntTweakBar\include\AntTweakBar.h" />
@@ -446,6 +448,7 @@
     <ClInclude Include="Simulation\IDFactory.h" />
     <ClInclude Include="Simulation\kdTree.h" />
     <ClInclude Include="Simulation\LineModel.h" />
+    <ClInclude Include="Simulation\Liu13_ClothModel.h" />
     <ClInclude Include="Simulation\NeighborhoodSearchSpatialHashing.h" />
     <ClInclude Include="Simulation\ParticleData.h" />
     <ClInclude Include="Simulation\RigidBody.h" />

@@ -1,6 +1,7 @@
 #include "SimulationModel.h"
 #include "PositionBasedDynamics/PositionBasedRigidBodyDynamics.h"
 #include "Constraints.h"
+#include "Liu13_ClothModel.h"
 
 using namespace PBD;
 using namespace GenParam;
@@ -174,6 +175,7 @@ void SimulationModel::reset()
 		m_particles.getOldPosition(i) = m_particles.getPosition(i);
 		m_particles.getVelocity(i).setZero();
 		m_particles.getAcceleration(i).setZero();
+		m_particles.getForce(i).setZero();
 	}
 
 	// orientations
@@ -186,7 +188,14 @@ void SimulationModel::reset()
 		m_orientations.getVelocity(i).setZero();
 		m_orientations.getAcceleration(i).setZero();
 	}
-
+	for (unsigned int i = 0; i < m_triangleModels.size(); i++)
+	{
+		if (m_triangleModels[i]->isLiu)
+		{
+			Liu13_ClothModel* tri = (Liu13_ClothModel*)m_triangleModels[i];
+			tri->restart();
+		}
+	}
 	updateConstraints();
 }
 
@@ -376,6 +385,7 @@ bool SimulationModel::addDamperJoint(const unsigned int rbIndex1, const unsigned
 bool SimulationModel::addRigidBodyParticleBallJoint(const unsigned int rbIndex, const unsigned int particleIndex)
 {
 	RigidBodyParticleBallJoint *bj = new RigidBodyParticleBallJoint();
+	
 	const bool res = bj->initConstraint(*this, rbIndex, particleIndex);
 	if (res)
 	{
@@ -627,6 +637,31 @@ bool PBD::SimulationModel::addDirectPositionBasedSolverForStiffRodsConstraint(
 	}
 	return res;
 }
+
+
+void SimulationModel::addLiuModel(
+	const unsigned int nPoints,
+	const unsigned int nFaces,
+	Vector3r* points,
+	unsigned int* indices,
+	const TriangleModel::ParticleMesh::UVIndices& uvIndices,
+	const TriangleModel::ParticleMesh::UVs& uvs)
+{
+	Liu13_ClothModel* triModel = new Liu13_ClothModel();
+	m_triangleModels.push_back(triModel);
+
+	unsigned int startIndex = m_particles.size();
+	m_particles.reserve(startIndex + nPoints);
+
+	for (unsigned int i = 0; i < nPoints; i++)
+		m_particles.addVertex(points[i]);
+
+	triModel->initMesh(nPoints, nFaces, startIndex, indices, uvIndices, uvs);
+
+	// Update normals
+	triModel->updateMeshNormals(m_particles);
+}
+
 
 void SimulationModel::addTriangleModel(
 	const unsigned int nPoints, 

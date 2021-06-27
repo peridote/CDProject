@@ -26,6 +26,7 @@
 #include "Utils/FileSystem.h"
 #include "Simulation/Simulation.h"
 #include "Simulation/DistanceFieldCollisionDetection.h"
+#include "Simulation/Liu13_ClothModel.h"
 
 #define BIT(x) (1 << x)
 #define PI std::atan(1.0)*4
@@ -42,16 +43,29 @@ public:
 	ImGuiIO* m_io;
 	int m_w, m_h;
 	std::string m_dirPath;
+	ImGuiWindowFlags window_flags;
 
 	int m_filetreeitem_current_idx;
 	std::string m_filetree_current_item;
 	std::string m_filetree_double_clicked_item;
-	std::vector<std::string> m_filetreeitems;
-	unsigned int m_filetree_num;
+	std::vector<std::string> m_cube_tree_items;
+	std::vector<std::string> m_cylinder_tree_items;
+	std::vector<std::string> m_sphere_tree_items;
+	std::vector<std::string> m_cloth_tree_items;
+	std::vector<std::string> m_torus_tree_items;
+	std::vector<std::string> m_custom_tree_items;
+	unsigned int m_rigidbody_num;
+
+	// cube = 0, cylinder = 1, sphere = 2, cloth = 3, torus = 4, custom = 5
+	enum treetype { cube, cylinder, sphere, cloth, torus, custom };
+	unsigned int which_tree;
 
 	unsigned int m_fbo_texture;
 	unsigned int m_fbo_depth;
 	unsigned int m_fbo;
+	unsigned int m_fbo_texture2;
+	unsigned int m_fbo_depth2;
+	unsigned int m_fbo2;
 	GLuint m_shaderProgram;
 
 	std::map<std::string, int> m_map_filetree_rigidbody;
@@ -112,6 +126,7 @@ public:
 	void showDirectoryTree(std::string directoryPath);
 	void loadObj(const std::string& filename, PBD::VertexData& vd, Utilities::IndexedFaceMesh& mesh, const Vector3r& scale);
 	void addRigidbody(std::string fName);
+	void addRigidbody(treetype tree);
 	
 	// reset 버튼 누를시 호출
 	void reset(); 
@@ -122,12 +137,16 @@ public:
 	void createCenterMenu();
 	void createBottomMenu();
 	void createFileDialogBtn();
-	
 
 	void fbo_init();
-	void fbo_bind();
-	void fbo_unbind();
+	void fbo2_init();
+	void fbo_bind(unsigned int n);
+	void fbo_unbind(unsigned int n);
 	void fbo_cleanup();
 	void draw();
+
+	void createMesh();
+	void createLiuMesh();
+	void createTorus();
 };
 #endif

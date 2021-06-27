@@ -226,7 +226,7 @@ void MiniGL::drawSphere(const Vector3r& translation, float radius, float* color,
 
 	glPushMatrix();
 	glTranslated((translation)[0], (translation)[1], (translation)[2]);
-	glutSolidSphere(radius, subDivision, subDivision);
+	//glutSolidSphere(radius, subDivision, subDivision);
 	glPopMatrix();
 }
 
@@ -465,7 +465,7 @@ void MiniGL::display()
 	//glutSwapBuffers();
 	//glFlush();
 
-	drawElements();
+	//drawElements();
 
 	if (scenefunc != NULL)
 		scenefunc();

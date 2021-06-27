@@ -98,6 +98,7 @@ namespace PBD
 			std::vector<Vector3r> m_a;
 			std::vector<Vector3r> m_oldX;
 			std::vector<Vector3r> m_lastX;
+			std::vector<Vector3r> m_f;
 
 		public:
 			FORCE_INLINE ParticleData(void)	:
@@ -108,7 +109,8 @@ namespace PBD
 				  m_v(),
 				  m_a(),
 				  m_oldX(),
-				  m_lastX()
+				  m_lastX(),
+				  m_f()
 			{
 			}
 
@@ -122,6 +124,7 @@ namespace PBD
 				m_a.clear();
 				m_oldX.clear();
 				m_lastX.clear();
+				m_f.clear();
 			}
 
 			FORCE_INLINE void addVertex(const Vector3r &vertex)
@@ -134,6 +137,7 @@ namespace PBD
 				m_invMasses.push_back(1.0);
 				m_v.push_back(Vector3r(0.0, 0.0, 0.0));
 				m_a.push_back(Vector3r(0.0, 0.0, 0.0));
+				m_f.push_back(Vector3r(0.0, 0.0, 0.0));
 			}
 
 			FORCE_INLINE Vector3r &getPosition(const unsigned int i)
@@ -211,6 +215,21 @@ namespace PBD
 				m_v[i] = vel;
 			}
 
+			FORCE_INLINE Vector3r &getForce(const unsigned int i)
+			{
+				return m_f[i];
+			}
+
+			FORCE_INLINE const Vector3r &getForce(const unsigned int i) const
+			{
+				return m_f[i];
+			}
+
+			FORCE_INLINE void setForce(const unsigned int i, const Vector3r& force)
+			{
+				m_f[i] = force;
+			}
+
 			FORCE_INLINE Vector3r &getAcceleration(const unsigned int i)
 			{
 				return m_a[i];
@@ -272,6 +291,7 @@ namespace PBD
 				m_a.resize(newSize);
 				m_oldX.resize(newSize);
 				m_lastX.resize(newSize);
+				m_f.resize(newSize);
 			}
 
 			/** Reserve the array containing the particle data.
@@ -286,6 +306,7 @@ namespace PBD
 				m_a.reserve(newSize);
 				m_oldX.reserve(newSize);
 				m_lastX.reserve(newSize);
+				m_f.reserve(newSize);
 			}
 
 			/** Release the array containing the particle data.
@@ -300,6 +321,7 @@ namespace PBD
 				m_a.clear();
 				m_oldX.clear();
 				m_lastX.clear();
+				m_f.clear();
 			}
 
 			/** Release the array containing the particle data.
