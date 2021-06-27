@@ -497,19 +497,19 @@ void Liu13_ClothModel::fixOverSpring(ParticleData& pd, Real h2)
 
 void Liu13_ClothModel::collisionSphere(ParticleData& pd)
 {
-	Vector3r center(4.5, -5, 4.5);
+	Vector3r center(5, -1.5, 5);
 	Real radius = 3;
 	for (unsigned int i = 0; i < size; i++)
 	{
-		Vector3r pos = pd.getPosition(i);
+		Vector3r &pos = pd.getPosition(i);
 		if ((center - pos).norm() > radius) continue;
 		//Vector3r oldp = m_XOld.segment(3 * i, 3);
 		//Real length = (oldp - pos).norm();
 		Vector3r dir = (pos - center).normalized();
-		pd.getPosition(i) = center + dir * (radius+0.01);
+		pos = center + dir * (radius+0.01);
 		//m_XOld.segment(3 * i, 3) = pd.getPosition(i) - dir * length;
 		//m_XOld.segment(3 * i, 3) = m_X.segment(3 * i, 3);
-		m_X.segment(3 * i, 3) = pd.getPosition(i).cast<double>();
+		m_X.segment(3 * i, 3) = pos.cast<double>();
 	}
 }
 void Liu13_ClothModel::restart()

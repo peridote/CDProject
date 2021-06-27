@@ -378,7 +378,7 @@ void ImguiManager::createMesh()
 	}
 
 	PBD::SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
-	//PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	
 	for (unsigned int i = 0; i < tm.size(); i++)
 	{
 		const unsigned int nVert = tm[i]->getParticleMesh().numVertices();
@@ -465,7 +465,7 @@ void ImguiManager::createLiuMesh()
 	tri->init(pd);
 	//
 	PBD::SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
-	//PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
+	PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
 	for (unsigned int i = 0; i < tm.size(); i++)
 	{
 		const unsigned int nVert = tm[i]->getParticleMesh().numVertices();
@@ -877,7 +877,7 @@ void ImguiManager::createRightSideMenu()
 				static float prev_rb_scale_x = 1.0f;
 				static float prev_rb_scale_y = 1.0f;
 				static float prev_rb_scale_z = 1.0f;
-
+				
 				static float rb_trans_x = rb[n-1]->getPosition()(0);
 				static float rb_trans_y = rb[n-1]->getPosition()(1);
 				static float rb_trans_z = rb[n-1]->getPosition()(2);
@@ -898,23 +898,23 @@ void ImguiManager::createRightSideMenu()
 					if (l == ImGui::GetKeyIndex(ImGuiKey_LeftArrow) && ImGui::IsKeyPressed(l))
 					{
 						printf("left\n");
-						rb_trans_x -= 0.1f;
+						rb_trans_x -= 0.5f;
 					}
 					else if (l == ImGui::GetKeyIndex(ImGuiKey_RightArrow) && ImGui::IsKeyPressed(l))
 					{
 						printf("right\n");
-						rb_trans_x += 0.1f;
+						rb_trans_x += 0.5f;
 
 					}
 					else if (l == ImGui::GetKeyIndex(ImGuiKey_UpArrow) && ImGui::IsKeyPressed(l))
 					{
 						printf("up\n");
-						rb_trans_y += 0.1f;
+						rb_trans_y += 0.5f;
 					}
 					else if (l == ImGui::GetKeyIndex(ImGuiKey_DownArrow) && ImGui::IsKeyPressed(l))
 					{
 						printf("down\n");
-						rb_trans_y -= 0.1f;
+						rb_trans_y -= 0.5f;
 					}
 				}
 
@@ -931,6 +931,12 @@ void ImguiManager::createRightSideMenu()
 				ImGui::SliderFloat("rb_scale_y", &rb_scale_y, 0.5f, 5.0f);
 				ImGui::SliderFloat("rb_scale_z", &rb_scale_z, 0.5f, 5.0f);
 
+				if (ImGui::Button("ClothJoint"))
+				{
+					Simulation* current = Simulation::getCurrent();
+					for (int i = 2450; i < 2500; i++)
+						current->getModel()->addRigidBodyParticleBallJoint(0, i);
+				}
 
 				for (int i = 0; i < 2; i++)
 				{
@@ -1018,6 +1024,8 @@ void ImguiManager::createRightSideMenu()
 						}
 					}
 				}
+
+		
 
 
 				/*if (rb_scale_x != prev_rb_scale_x || rb_scale_y != prev_rb_scale_y || rb_scale_z != prev_rb_scale_z) {
@@ -1192,7 +1200,7 @@ void ImguiManager::addRigidbody(treetype tree)
 			Quaternionr(1.0, 0.0, 0.0, 0.0),
 			vd, mesh,
 			Vector3r(2.0, 2.0, 2.0));
-		n_rigidbody->setMass(1.0);
+		n_rigidbody->setMass(0.0);
 		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
 		break;
 	case cylinder:
@@ -1232,23 +1240,27 @@ void ImguiManager::addRigidbody(treetype tree)
 
 	rb.push_back(n_rigidbody);
 	//LOG_INFO << "debug" << rb.size() - 1;
-
+	//model->addRigidBodyParticleBallJoint(0, 1);
 	const std::vector<Vector3r>* vertices = rb.back()->getGeometry().getVertexDataLocal().getVertices();
 	const unsigned int nVert = static_cast<unsigned int>(vertices->size());
 	
 	PBD::Simulation* current = PBD::Simulation::getCurrent();
-	
+
 	switch (tree)
 	{
 	case cube:
 		if (current == PBD::Simulation::m_simul1) {
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep()->getCollisionDetection();
 			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(2.0, 2.0, 2.0));
+			//current->getModel()->addRigidBodyParticleBallJoint(rb.size() - 1, 0);
 		}
 		else if (current == PBD::Simulation::m_simul2) {
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
 			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(2.0, 2.0, 2.0));
 		}
+		
+		
+		
 		break;
 	case cylinder:
 		if (current == PBD::Simulation::m_simul1) {

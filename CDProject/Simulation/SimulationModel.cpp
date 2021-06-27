@@ -385,6 +385,7 @@ bool SimulationModel::addDamperJoint(const unsigned int rbIndex1, const unsigned
 bool SimulationModel::addRigidBodyParticleBallJoint(const unsigned int rbIndex, const unsigned int particleIndex)
 {
 	RigidBodyParticleBallJoint *bj = new RigidBodyParticleBallJoint();
+	
 	const bool res = bj->initConstraint(*this, rbIndex, particleIndex);
 	if (res)
 	{
