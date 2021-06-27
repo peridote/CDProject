@@ -90,6 +90,7 @@
     <ClCompile Include="Visualization\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\PositionBasedDynamics-master\Simulation\ParticleData.h" />
     <ClInclude Include="Common\DemoBase.h" />
     <ClInclude Include="Common\TweakBarParameters.h" />
     <ClInclude Include="extern\AntTweakBar\include\AntTweakBar.h" />

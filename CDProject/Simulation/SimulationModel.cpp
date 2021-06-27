@@ -175,6 +175,7 @@ void SimulationModel::reset()
 		m_particles.getOldPosition(i) = m_particles.getPosition(i);
 		m_particles.getVelocity(i).setZero();
 		m_particles.getAcceleration(i).setZero();
+		m_particles.getForce(i).setZero();
 	}
 
 	// orientations
@@ -187,7 +188,14 @@ void SimulationModel::reset()
 		m_orientations.getVelocity(i).setZero();
 		m_orientations.getAcceleration(i).setZero();
 	}
-
+	for (unsigned int i = 0; i < m_triangleModels.size(); i++)
+	{
+		if (m_triangleModels[i]->isLiu)
+		{
+			Liu13_ClothModel* tri = (Liu13_ClothModel*)m_triangleModels[i];
+			tri->restart();
+		}
+	}
 	updateConstraints();
 }
 

@@ -26,7 +26,9 @@ namespace PBD
 			Real m_restitutionCoeff;
 			Real m_frictionCoeff;
 
+
 		public:
+			bool isLiu = false;
 			void updateConstraints();
 
 			ParticleMesh &getParticleMesh();

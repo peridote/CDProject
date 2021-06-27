@@ -81,35 +81,128 @@ void TimeStepController::step_liu(SimulationModel& model)
 	TimeManager* tm = TimeManager::getCurrent2();
 	const Real hOld = tm->getTimeStepSize();
 
-	Real h = hOld / (Real)m_subSteps;
-	h = 0.033;
+	Real h = hOld;
+	//h = 0.033;
 	tm->setTimeStepSize(h);
 	
-	Vector3r grav = Vector3r(0.0f, -9.81f, 0.0f);
+	Vector3r grav = Vector3r(0.0, -9.81, 0.0);
 
 	ParticleData& pd = model.getParticles();
-	Liu13_ClothModel* tri = (Liu13_ClothModel*)model.getTriangleModels()[0];
+	if (model.getTriangleModels().size() > 0) {
+		Liu13_ClothModel* tri = (Liu13_ClothModel*)model.getTriangleModels()[0];
 
-	tm->setTimeStepSize(h);
-	for (int i = 0; i < (int)pd.size(); i++)
-	{
-			pd.getVelocity(i) += pd.getMass(i) * grav;
+#pragma omp for schedule(static) 
+		for (int i = 0; i < (int)pd.size(); i++)
+		{
+			Vector3r vel = pd.getVelocity(i);
+			vel *= 1.2;
+			TimeIntegration::semiImplicitEuler(h, pd.getMass(i), pd.getPosition(i), vel, Vector3r(0, 0, 0));
+			pd.getVelocity(i) = Vector3r(0, 0, 0);
+		}
+		tri->getPositionVector(pd);
+		for (int i = 0; i < (int)pd.size(); i++)
+		{
+			pd.getForce(i) += pd.getMass(i) * grav;
+		}
+		tri->getForceVector(pd, h);
+
+		for (unsigned int step = 0; step < m_subSteps; step++)
+		{
+			tri->localStep(pd);
+			tri->globalStep(pd, h);
+		}
+
+		/*tri->setFixPoint(pd);*/
+		tri->fixOverSpring(pd, h * h);
+		
+		tri->vectorToPosition(pd);
+		/*tri->collisionSphere(pd);
+		tri->fixedPointMovement(pd);*/
 	}
+	clearAccelerations(model);
+	SimulationModel::RigidBodyVector& rb = model.getRigidBodies();
+	OrientationData& od = model.getOrientations();
 
-	tri->getForceVector(pd, h);
-	
+	const int numBodies = (int)rb.size();
+
+	h = hOld / (Real)m_subSteps;
+	tm->setTimeStepSize(h);
 	for (unsigned int step = 0; step < m_subSteps; step++)
 	{
-		tri->localStep(pd);
-		tri->globalStep(pd, h);
+#pragma omp parallel if(numBodies > MIN_PARALLEL_SIZE) default(shared)
+		{
+#pragma omp for schedule(static) nowait
+			for (int i = 0; i < numBodies; i++)
+			{
+				rb[i]->getLastPosition() = rb[i]->getOldPosition();
+				rb[i]->getOldPosition() = rb[i]->getPosition();
+				TimeIntegration::semiImplicitEuler(h, rb[i]->getMass(), rb[i]->getPosition(), rb[i]->getVelocity(), rb[i]->getAcceleration());
+				rb[i]->getLastRotation() = rb[i]->getOldRotation();
+				rb[i]->getOldRotation() = rb[i]->getRotation();
+				TimeIntegration::semiImplicitEulerRotation(h, rb[i]->getMass(), rb[i]->getInertiaTensorInverseW(), rb[i]->getRotation(), rb[i]->getAngularVelocity(), rb[i]->getTorque());
+				rb[i]->rotationUpdated();
+			}
+			//////////////////////////////////////////////////////////////////////////
+			// orientation model
+			//////////////////////////////////////////////////////////////////////////
+#pragma omp for schedule(static) 
+			for (int i = 0; i < (int)od.size(); i++)
+			{
+				od.getLastQuaternion(i) = od.getOldQuaternion(i);
+				od.getOldQuaternion(i) = od.getQuaternion(i);
+				TimeIntegration::semiImplicitEulerRotation(h, od.getMass(i), od.getInvMass(i) * Matrix3r::Identity(), od.getQuaternion(i), od.getVelocity(i), Vector3r(0, 0, 0));
+			}
+		}
+
+		START_TIMING("position constraints projection");
+		positionConstraintProjection(model);
+		STOP_TIMING_AVG;
+
+#pragma omp parallel if(numBodies > MIN_PARALLEL_SIZE) default(shared)
+		{
+			// Update velocities	
+#pragma omp for schedule(static) nowait
+			for (int i = 0; i < numBodies; i++)
+			{
+				if (m_velocityUpdateMethod == 0)
+				{
+					TimeIntegration::velocityUpdateFirstOrder(h, rb[i]->getMass(), rb[i]->getPosition(), rb[i]->getOldPosition(), rb[i]->getVelocity());
+					TimeIntegration::angularVelocityUpdateFirstOrder(h, rb[i]->getMass(), rb[i]->getRotation(), rb[i]->getOldRotation(), rb[i]->getAngularVelocity());
+				}
+				else
+				{
+					TimeIntegration::velocityUpdateSecondOrder(h, rb[i]->getMass(), rb[i]->getPosition(), rb[i]->getOldPosition(), rb[i]->getLastPosition(), rb[i]->getVelocity());
+					TimeIntegration::angularVelocityUpdateSecondOrder(h, rb[i]->getMass(), rb[i]->getRotation(), rb[i]->getOldRotation(), rb[i]->getLastRotation(), rb[i]->getAngularVelocity());
+				}
+			}
+
+			// Update velocites of orientations
+#pragma omp for schedule(static) 
+			for (int i = 0; i < (int)od.size(); i++)
+			{
+				if (m_velocityUpdateMethod == 0)
+					TimeIntegration::angularVelocityUpdateFirstOrder(h, od.getMass(i), od.getQuaternion(i), od.getOldQuaternion(i), od.getVelocity(i));
+				else
+					TimeIntegration::angularVelocityUpdateSecondOrder(h, od.getMass(i), od.getQuaternion(i), od.getOldQuaternion(i), od.getLastQuaternion(i), od.getVelocity(i));
+			}
+		}
 	}
-	
-	//tri->setFixPoint(pd);
-	tri->fixOverSpring(pd, h * h);
-	tri->vectorToPosition(pd);
+	h = hOld;
+	tm->setTimeStepSize(hOld);
+
+#pragma omp parallel if(numBodies > MIN_PARALLEL_SIZE) default(shared)
+	{
+		// Update velocities	
+#pragma omp for schedule(static) nowait
+		for (int i = 0; i < numBodies; i++)
+		{
+			if (rb[i]->getMass() != 0.0)
+				rb[i]->getGeometry().updateMeshTransformation(rb[i]->getPosition(), rb[i]->getRotationMatrix());
+		}
+	}
 
 
-	/*if (m_collisionDetection)
+	if (m_collisionDetection)
 	{
 		START_TIMING("collision detection");
 		m_collisionDetection->collisionDetection(model);
@@ -117,11 +210,48 @@ void TimeStepController::step_liu(SimulationModel& model)
 	}
 
 	velocityConstraintProjection(model);
-*/
 
-	//tri->collisionSphere(pd);
-	//tri->fixedPointMovement(pd);
+	//////////////////////////////////////////////////////////////////////////
+	// update motor joint targets
+	//////////////////////////////////////////////////////////////////////////
+	SimulationModel::ConstraintVector& constraints = model.getConstraints();
+	for (unsigned int i = 0; i < constraints.size(); i++)
+	{
+		if ((constraints[i]->getTypeId() == TargetAngleMotorHingeJoint::TYPE_ID) ||
+			(constraints[i]->getTypeId() == TargetVelocityMotorHingeJoint::TYPE_ID) ||
+			(constraints[i]->getTypeId() == TargetPositionMotorSliderJoint::TYPE_ID) ||
+			(constraints[i]->getTypeId() == TargetVelocityMotorSliderJoint::TYPE_ID))
+		{
+			MotorJoint* motor = (MotorJoint*)constraints[i];
+			const std::vector<Real> sequence = motor->getTargetSequence();
+			if (sequence.size() > 0)
+			{
+				Real time = tm->getTime();
+				const Real sequenceDuration = sequence[sequence.size() - 2] - sequence[0];
+				if (motor->getRepeatSequence())
+				{
+					while (time > sequenceDuration)
+						time -= sequenceDuration;
+				}
+				unsigned int index = 0;
+				while ((2 * index < sequence.size()) && (sequence[2 * index] <= time))
+					index++;
 
+				// linear interpolation
+				Real target = 0.0;
+				if (2 * index < sequence.size())
+				{
+					const Real alpha = (time - sequence[2 * (index - 1)]) / (sequence[2 * index] - sequence[2 * (index - 1)]);
+					target = (static_cast<Real>(1.0) - alpha) * sequence[2 * index - 1] + alpha * sequence[2 * index + 1];
+				}
+				else
+					target = sequence[sequence.size() - 1];
+				motor->setTarget(target);
+			}
+		}
+	}
+
+	// compute new time	
 	tm->setTime(tm->getTime() + h);
 	STOP_TIMING_AVG;
 }

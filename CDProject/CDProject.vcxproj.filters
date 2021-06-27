@@ -272,9 +272,6 @@
     <ClInclude Include="Simulation\NeighborhoodSearchSpatialHashing.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Simulation\ParticleData.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Simulation\RigidBody.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -1380,6 +1377,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Simulation\Liu13_ClothModel.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PositionBasedDynamics-master\Simulation\ParticleData.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulation\ParticleData.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
