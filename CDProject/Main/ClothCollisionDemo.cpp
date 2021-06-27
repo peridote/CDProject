@@ -754,11 +754,11 @@ void evalMomentum(Vector3r& momentum)
 	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
 	momentum = Vector3r(0.0,0.0,0.0);
-	// momentum of rigid bodies
-	for (int i = 0; i < rb.size(); i++)
-	{
-		momentum += rb[i]->getVelocity() * rb[i]->getMass();
-	}
+	//// momentum of rigid bodies
+	//for (int i = 0; i < rb.size(); i++)
+	//{
+	//	momentum += rb[i]->getVelocity() * rb[i]->getMass();
+	//}
 
 	// momentum of particles
 	for (int i = 0; i < pd.size(); i++)
