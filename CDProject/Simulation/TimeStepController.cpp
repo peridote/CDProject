@@ -104,11 +104,11 @@ void TimeStepController::step_liu(SimulationModel& model)
 		tri->globalStep(pd, h);
 	}
 	
-	/*tri->setFixPoint(pd);
-	tri->fixOverSpring(pd, h * h);
-	tri->vectorToPosition(pd);*/
-	/*tri->collisionSphere(pd);
-	tri->fixedPointMovement(pd);*/
+	//tri->setFixPoint(pd);
+	/*tri->fixOverSpring(pd, h * h);
+	tri->vectorToPosition(pd);
+	tri->collisionSphere(pd);*/
+	//tri->fixedPointMovement(pd);*/
 
 	tm->setTime(tm->getTime() + h);
 	STOP_TIMING_AVG;
