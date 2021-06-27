@@ -191,9 +191,37 @@ int main(int argc, char** argv)
 		ImGui::SliderFloat("trans_x", &trans_x, -50.0f, 50.0f);
 		ImGui::SliderFloat("trans_y", &trans_y, -50.0f, 50.0f);
 		ImGui::SliderFloat("trans_z", &trans_z, -300.0f, 300.0f);
+
+		// move scene using mouse drag with left button
+		ImVec2 diff_left = ImGui::GetMouseDragDelta(0);
+		ImGui::ResetMouseDragDelta(0);
+		trans_x += -diff_left[0] / static_cast<Real>(20.0);
+		trans_y += diff_left[1] / static_cast<Real>(20.0);
+
+		// zoom in or out using mouse wheel
+		float wheelcounter = ImGui::GetIO().MouseWheel;
+		trans_z += -(wheelcounter) / static_cast<Real>(10.0);
+
 		MiniGL::m_translation.x() = -(Real)trans_x;
 		MiniGL::m_translation.y() = -(Real)trans_y;
 		MiniGL::m_translation.z() = -(Real)trans_z;
+
+		// rotate scene using mouse drag with right button
+		ImVec2 diff_right = ImGui::GetMouseDragDelta(1);
+		ImGui::ResetMouseDragDelta(1);
+		if (rot_x + diff_right[1] > 360.0f)
+			rot_x = 360.0f;
+		else if (rot_x + diff_right[1] < -360.0f)
+			rot_x = -360.0f;
+		else
+			rot_x += diff_right[1];
+
+		if (rot_y - diff_right[0] > 360.0f)
+			rot_y = 360.0f;
+		else if (rot_y - diff_right[0] < -360.0f)
+			rot_y = -360.0f;
+		else
+			rot_y -= diff_right[0];
 
 		//ImGui::SliderFloat("rot_w", &rot_w, 0.0f, 1.0f);
 		ImGui::SliderFloat("rot_x", &rot_x, -180.0f, 180.0f);
