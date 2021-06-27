@@ -15,6 +15,7 @@ short simulationMethod = 2;
 short bendingMethod = 2;
 int nCloth = 0;
 int nTorus = 0;
+int nFloor = 0;
 int nSphere = 0;
 int nCylinder = 0;
 int nCube = 0;
@@ -186,6 +187,7 @@ void ImguiManager::reset()
 	m_sphere_tree_items.clear();
 	m_cloth_tree_items.clear();
 	m_torus_tree_items.clear();
+	m_floor_tree_items.clear();
 	m_custom_tree_items.clear();
 	m_map_filetree_rigidbody.clear();
 	//m_custom_tree_items.push_back("(1)torus.obj"); // 현재 collision demo 기본 obj가 tours라서 넣어줌...
@@ -193,6 +195,7 @@ void ImguiManager::reset()
 
 	nCloth = 0;
 	nTorus = 0;
+	nFloor = 0;
 	nSphere = 0;
 	nCylinder = 0;
 	nCube = 0;
@@ -643,7 +646,17 @@ void ImguiManager::createLeftSideMenu()
 				{
 					createMesh();
 					PBD::Simulation::switchCurrent();
-					createLiuMesh();
+					SimulationMethods method = static_cast<SimulationMethods>(PBD::Simulation::getCurrent()->getSimulationMethod());
+
+					if (method == SimulationMethods::PBD)
+					{
+						createMesh();
+					}
+					else if (method == SimulationMethods::TEST)
+					{
+						createLiuMesh();
+					}
+					
 					PBD::Simulation::switchCurrent();
 
 					nCloth += 1;
@@ -709,6 +722,51 @@ void ImguiManager::createLeftSideMenu()
 					m_filetree_current_item = m_torus_tree_items[n];
 					m_filetreeitem_current_idx = n;
 					which_tree = torus;
+				}
+
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+				ImGui::PopID();
+			}
+			ImGui::TreePop();
+		}
+
+		ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+		if (ImGui::TreeNode("Floor"))
+		{
+			ImGui::SameLine(120, 0);
+			if (ImGui::SmallButton("create"))
+			{
+				if (nFloor == 0)
+				{
+
+					addRigidbody(floor);
+					PBD::Simulation::switchCurrent();
+					addRigidbody(floor);
+					PBD::Simulation::switchCurrent();
+
+					nFloor += 1;
+					std::string name = "(" + std::to_string(nTorus) + ")" + "floor";
+
+					m_map_filetree_rigidbody.insert(std::make_pair(name, m_rigidbody_num++));
+					m_floor_tree_items.push_back(name);
+				}
+				else
+				{
+					// message 출력
+
+				}
+			}
+
+			for (int n = 0; n < m_floor_tree_items.size(); n++)
+			{
+				ImGui::PushID(n);
+				const bool is_selected = (m_filetreeitem_current_idx == n && which_tree == floor);
+				if (ImGui::Selectable(m_floor_tree_items[n].c_str(), is_selected))
+				{
+					m_filetree_current_item = m_floor_tree_items[n];
+					m_filetreeitem_current_idx = n;
+					which_tree = floor;
 				}
 
 				if (is_selected)
@@ -933,9 +991,10 @@ void ImguiManager::createRightSideMenu()
 
 				if (ImGui::Button("ClothJoint"))
 				{
-					Simulation* current = Simulation::getCurrent();
-					for (int i = 2450; i < 2500; i++)
-						current->getModel()->addRigidBodyParticleBallJoint(0, i);
+					for (int i = 2450; i < 2500; i++) {
+						Simulation::m_simul1->getModel()->addRigidBodyParticleBallJoint(0, i);
+						Simulation::m_simul2->getModel()->addRigidBodyParticleBallJoint(0, i);
+					}
 				}
 
 				for (int i = 0; i < 2; i++)
@@ -1178,6 +1237,9 @@ void ImguiManager::addRigidbody(treetype tree)
 	case torus:
 		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/torus.obj");
 		break;
+	case floor:
+		fileName = Utilities::FileSystem::normalizePath(Utilities::FileSystem::normalizePath(Utilities::FileSystem::getDirectoryPath() + "/" + std::string("data")) + "/models/cube.obj");
+		break;
 	case custom:
 		break;
 	default:
@@ -1218,7 +1280,7 @@ void ImguiManager::addRigidbody(treetype tree)
 			Quaternionr(1.0, 0.0, 0.0, 0.0),
 			vd, mesh,
 			Vector3r(2.0, 2.0, 2.0));
-		n_rigidbody->setMass(1.0);
+		n_rigidbody->setMass(0.0);
 		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
 		break;
 	case cloth:
@@ -1231,6 +1293,14 @@ void ImguiManager::addRigidbody(treetype tree)
 			Vector3r(2.0, 2.0, 2.0));
 		n_rigidbody->setMass(0.0);
 		n_rigidbody->setFrictionCoeff(static_cast<Real>(0.1));
+		break;
+	case floor:
+		n_rigidbody->initBody(1.0,
+			Vector3r(0.0, -5.5, 0.0),
+			Quaternionr(1.0, 0.0, 0.0, 0.0),
+			vd, mesh,
+			Vector3r(100.0, 1.0, 100.0));
+		n_rigidbody->setMass(0.0);
 		break;
 	case custom:
 		break;
@@ -1252,15 +1322,11 @@ void ImguiManager::addRigidbody(treetype tree)
 		if (current == PBD::Simulation::m_simul1) {
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep()->getCollisionDetection();
 			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(2.0, 2.0, 2.0));
-			//current->getModel()->addRigidBodyParticleBallJoint(rb.size() - 1, 0);
 		}
 		else if (current == PBD::Simulation::m_simul2) {
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
 			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(2.0, 2.0, 2.0));
 		}
-		
-		
-		
 		break;
 	case cylinder:
 		if (current == PBD::Simulation::m_simul1) {
@@ -1271,7 +1337,6 @@ void ImguiManager::addRigidbody(treetype tree)
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
 			cd.addCollisionCylinder(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector2r(2.0, 4.0));
 		}
-		
 		break;
 	case sphere:
 		if (current == PBD::Simulation::m_simul1) {
@@ -1282,7 +1347,6 @@ void ImguiManager::addRigidbody(treetype tree)
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
 			cd.addCollisionSphere(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, 2);
 		}
-		
 		break;
 	case cloth:
 		break;
@@ -1294,6 +1358,16 @@ void ImguiManager::addRigidbody(treetype tree)
 		else if (current == PBD::Simulation::m_simul2) {
 			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
 			cd.addCollisionTorus(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector2r(2.0, 1.0));
+		}
+		break;
+	case floor:
+		if (current == PBD::Simulation::m_simul1) {
+			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep()->getCollisionDetection();
+			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(100.0, 1.0, 100.0));
+		}
+		else if (current == PBD::Simulation::m_simul2) {
+			PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)current->getTimeStep2()->getCollisionDetection();
+			cd.addCollisionBox(rb.size() - 1, PBD::CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices)[0], nVert, Vector3r(100.0, 1.0, 100.0));
 		}
 		break;
 	case custom:

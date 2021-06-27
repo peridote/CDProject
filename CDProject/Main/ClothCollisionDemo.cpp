@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 {
 	REPORT_MEMORY_LEAKS
 
-	base = new DemoBase();
+		base = new DemoBase();
 	base->init(argc, argv, "Cloth simulation");
 
 	//base2 = new DemoBase();
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
 		if (ImGui::Begin("Scene1", NULL, im->window_flags))
 		{
 			ImGui::SetWindowPos(ImVec2(180, 20));
-			ImGui::SetWindowSize(ImVec2(im->m_w/2.5, im->m_h/2.5 + 35));
+			ImGui::SetWindowSize(ImVec2(im->m_w / 2.5, im->m_h / 2.5 + 35));
 			ImVec2 wsize = ImGui::GetWindowSize();
 			MiniGL::width = im->m_w;
 			MiniGL::height = im->m_h;
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
 			rdata1.Span = history;
 			rdata2.Span = history;
 
-			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels; 
+			static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
 			ImPlot::SetNextPlotLimitsX(t - history, t, ImGuiCond_Always);
 			ImPlot::SetNextPlotLimitsY(0, 20);
 
@@ -286,7 +286,7 @@ int main(int argc, char** argv)
 		if (ImGui::Begin("Scene2", NULL, im->window_flags))
 		{
 			ImGui::SetWindowPos(ImVec2(180 + im->m_w / 2.5, 20));
-			ImGui::SetWindowSize(ImVec2(im->m_w/2.5, im->m_h/2.5 + 35));
+			ImGui::SetWindowSize(ImVec2(im->m_w / 2.5, im->m_h / 2.5 + 35));
 			ImVec2 wsize2 = ImGui::GetWindowSize();
 			MiniGL::width = im->m_w;
 			MiniGL::height = im->m_h;
@@ -351,12 +351,12 @@ int main(int argc, char** argv)
 		}
 		ImGui::End();
 
-;		/*static std::vector<float> v = { 1 };
-		static float i = 0;
-		v.push_back(i++);
-		float* x_data = &v[0];
-		static std::vector<float> w = { 3 };
-		float* y_data = &w[0];*/
+		;		/*static std::vector<float> v = { 1 };
+				static float i = 0;
+				v.push_back(i++);
+				float* x_data = &v[0];
+				static std::vector<float> w = { 3 };
+				float* y_data = &w[0];*/
 
 		im->Render();
 	}
@@ -394,9 +394,10 @@ void restart()
 	Utilities::Timing::printAverageTimes();
 	Utilities::Timing::reset();
 
-	Simulation::getCurrent()->reset();
+	Simulation::m_simul1->reset();
+	Simulation::m_simul2->reset();
 
-	//base->getSelectedParticles().clear();
+	base->getSelectedParticles().clear();
 
 	//SimulationModel* model = Simulation::getCurrent()->getModel();
 	//SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
@@ -424,12 +425,13 @@ void reset(ImguiManager* im, unsigned int n)
 	//Simulation::getCurrent()->getModel()->cleanup();
 	Simulation::m_simul1->getModel()->cleanup();
 	Simulation::m_simul2->getModel()->cleanup();
-	
-		Simulation::m_simul1->getTimeStep()->getCollisionDetection()->cleanup();
-	
-		Simulation::m_simul2->getTimeStep2()->getCollisionDetection()->cleanup();
-	
-	switch (n)
+
+	Simulation::m_simul1->getTimeStep()->getCollisionDetection()->cleanup();
+
+	Simulation::m_simul2->getTimeStep2()->getCollisionDetection()->cleanup();
+	//buildModel();
+	//buildModel2();
+	/*switch (n)
 	{
 	case 0:
 		buildModel();
@@ -439,7 +441,7 @@ void reset(ImguiManager* im, unsigned int n)
 		break;
 	default:
 		break;
-	}
+	}*/
 
 	im->reset();
 }
@@ -477,7 +479,7 @@ void timeStep()
 	for (unsigned int i = 0; i < numSteps; i++)
 	{
 		START_TIMING("SimStep");
-		
+
 		if (current == Simulation::m_simul1) {
 			current->getTimeStep()->steps();
 		}
@@ -553,8 +555,8 @@ void buildModel()
 	IndexedFaceMesh mesh;
 	VertexData vd;
 	loadObj(fileName, vd, mesh, Vector3r::Ones());
-
-	SimulationModel* model = Simulation::getCurrent()->getModel();
+	Simulation* simulation = Simulation::m_simul1;
+	SimulationModel* model = simulation->getModel();
 	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
 	rb.resize(1);
@@ -567,13 +569,8 @@ void buildModel()
 		Vector3r(100.0, 1.0, 100.0));
 	rb[0]->setMass(0.0);
 
-	Simulation* simulation = Simulation::getCurrent();
-	if (simulation == Simulation::m_simul1) {
-		Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
-	} else if (simulation == Simulation::m_simul2) {
-		Simulation::getCurrent()->getTimeStep2()->setCollisionDetection(*model, &cd2);
-	}
-	
+	simulation->getTimeStep()->setCollisionDetection(*model, &cd);
+
 	cd.setTolerance(static_cast<Real>(0.05));
 
 	const std::vector<Vector3r>* vertices1 = rb[0]->getGeometry().getVertexDataLocal().getVertices();
@@ -602,7 +599,9 @@ void buildModel2()
 	VertexData vd;
 	loadObj(fileName, vd, mesh, Vector3r::Ones());
 
-	SimulationModel* model = Simulation::getCurrent()->getModel();
+	Simulation* simulation = Simulation::m_simul1;
+
+	SimulationModel* model = simulation->getModel();
 	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
 	rb.resize(1);
@@ -615,20 +614,14 @@ void buildModel2()
 		Vector3r(100.0, 1.0, 100.0));
 	rb[0]->setMass(0.0);
 
-	Simulation* simulation = Simulation::getCurrent();
-	if (simulation == Simulation::m_simul1) {
-		Simulation::getCurrent()->getTimeStep()->setCollisionDetection(*model, &cd);
-	}
-	else if (simulation == Simulation::m_simul2) {
-		Simulation::getCurrent()->getTimeStep2()->setCollisionDetection(*model, &cd2);
-	}
+	simulation->getTimeStep2()->setCollisionDetection(*model, &cd2);
 
 	cd2.setTolerance(static_cast<Real>(0.05));
 
 	const std::vector<Vector3r>* vertices1 = rb[0]->getGeometry().getVertexDataLocal().getVertices();
 	const unsigned int nVert1 = static_cast<unsigned int>(vertices1->size());
 	cd2.addCollisionBox(0, CollisionDetection::CollisionObject::RigidBodyCollisionObjectType, &(*vertices1)[0], nVert1, Vector3r(100.0, 1.0, 100.0));
-	
+
 	//SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
 	//ParticleData& pd = model->getParticles();
 	//for (unsigned int i = 0; i < tm.size(); i++)
@@ -754,7 +747,7 @@ void evalMomentum(Vector3r& momentum)
 	const ParticleData& pd = model->getParticles();
 	SimulationModel::RigidBodyVector& rb = model->getRigidBodies();
 
-	momentum = Vector3r(0.0,0.0,0.0);
+	momentum = Vector3r(0.0, 0.0, 0.0);
 	//// momentum of rigid bodies
 	//for (int i = 0; i < rb.size(); i++)
 	//{
@@ -764,7 +757,7 @@ void evalMomentum(Vector3r& momentum)
 	// momentum of particles
 	for (int i = 0; i < pd.size(); i++)
 	{
-		momentum += pd.getVelocity(i) * pd.getMass(i)/pd.size();
+		momentum += pd.getVelocity(i) * pd.getMass(i) / pd.size();
 	}
 }
 
