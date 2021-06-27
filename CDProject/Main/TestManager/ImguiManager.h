@@ -53,11 +53,12 @@ public:
 	std::vector<std::string> m_sphere_tree_items;
 	std::vector<std::string> m_cloth_tree_items;
 	std::vector<std::string> m_torus_tree_items;
+	std::vector<std::string> m_floor_tree_items;
 	std::vector<std::string> m_custom_tree_items;
 	unsigned int m_rigidbody_num;
 
-	// cube = 0, cylinder = 1, sphere = 2, cloth = 3, torus = 4, custom = 5
-	enum treetype { cube, cylinder, sphere, cloth, torus, custom };
+	// cube = 0, cylinder = 1, sphere = 2, cloth = 3, torus = 4, floor = 5, custom = 6
+	enum treetype { cube, cylinder, sphere, cloth, torus, floor, custom };
 	unsigned int which_tree;
 
 	unsigned int m_fbo_texture;

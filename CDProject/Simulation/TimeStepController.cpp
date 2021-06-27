@@ -105,10 +105,22 @@ void TimeStepController::step_liu(SimulationModel& model)
 	}
 	
 	//tri->setFixPoint(pd);
-	/*tri->fixOverSpring(pd, h * h);
+	tri->fixOverSpring(pd, h * h);
 	tri->vectorToPosition(pd);
-	tri->collisionSphere(pd);*/
-	//tri->fixedPointMovement(pd);*/
+
+
+	/*if (m_collisionDetection)
+	{
+		START_TIMING("collision detection");
+		m_collisionDetection->collisionDetection(model);
+		STOP_TIMING_AVG;
+	}
+
+	velocityConstraintProjection(model);
+*/
+
+	//tri->collisionSphere(pd);
+	//tri->fixedPointMovement(pd);
 
 	tm->setTime(tm->getTime() + h);
 	STOP_TIMING_AVG;
@@ -136,8 +148,8 @@ void TimeStepController::steps()
 	else if (method == SimulationMethods::TEST)
 	{
 		LOG_INFO << "TEST not implemented yet.";
-		step(*m_simulation->getCurrent()->getModel());
-		//step_liu(*m_simulation->getCurrent()->getModel());
+		//step(*m_simulation->getCurrent()->getModel());
+		step_liu(*m_simulation->getCurrent()->getModel());
 	}
 	
 }
