@@ -27,7 +27,7 @@ void Liu13_ClothModel::setParticleMass(ParticleData& pd)
 	
 	for (unsigned int i = 0; i < size; i++)
 	{
-		pd.setMass(i, 0.05);
+		pd.setMass(i, 1.0);
 	}
 	
 	/*
@@ -95,7 +95,7 @@ void Liu13_ClothModel::addStructureSpring()
 
 void Liu13_ClothModel::addShearSpring()
 {
-	Real k = 50;
+	Real k = 500;
 	m_springs.reserve(m_springs.size() + 2 * (nrow-1) * (ncol-1));
 	for (unsigned int i = 0; i < nrow - 1; i++)
 	{
@@ -174,6 +174,23 @@ void Liu13_ClothModel::getMassMatrix(Eigen::MatrixXd& matrix)
 	matrix = m_massMatrix;
 }
 
+void Liu13_ClothModel::init(ParticleData& pd)
+{
+	m_pd = &pd;
+	isLiu = true;
+	addSprings();
+	setParticleMass(pd);
+
+	setMassMatrix(pd);
+	setLMatrix();
+	setJMatrix();
+	setRestLength(pd);
+	setVectorSize();
+	getPositionVector(pd);
+	m_XOld = m_X;
+	setMLMatrix(0.005);
+}
+
 void Liu13_ClothModel::getPositionVector(ParticleData& pd)
 {
 	long long m;
@@ -182,13 +199,12 @@ void Liu13_ClothModel::getPositionVector(ParticleData& pd)
 
 	for (long long i = 0; i < m; i++)
 	{
-		Vector3r pos = pd.getPosition(i);
+		Vector3r pos = pd.getPosition(i + m_indexOffset);
 
 		m_X(3 * i) = pos.x();
 		m_X(3 * i + 1) = pos.y();
 		m_X(3 * i + 2) = pos.z();
 	}
-	m_XOld = m_X;
 
 }
 
@@ -311,16 +327,17 @@ void Liu13_ClothModel::getForceVector(ParticleData& pd, Real h)
 	m_b.setZero();
 	for (long long i = 0; i < m; i++)
 	{
-		Vector3r fext = h * h * pd.getVelocity(i);
+		Vector3r fext = h * h * pd.getForce(i);
 		Vector3r force = 1 * fext;
-		pd.setVelocity(i, Vector3r(0,0,0));
+		pd.setForce(i, Vector3r(0,0,0));
 		
 		m_b(3 * i) = force.x();
 		m_b(3 * i + 1) = force.y();
 		m_b(3 * i + 2) = force.z();
 
 	}
-	y = 1.95 * m_X - 0.95 * m_XOld;
+	double damp = 0.99;
+	y = (1+damp) * m_X - damp * m_XOld;
 	m_b += m_massMatrix * y;
 	
 	m_XOld = m_X;
@@ -339,7 +356,6 @@ void Liu13_ClothModel::setVectorSize()
 
 void Liu13_ClothModel::localStep(ParticleData& pd)
 {
-	//getPositionVector(pd);
 	std::vector<Spring> edge = m_springs;
 	m_d.setZero();
 	
@@ -397,11 +413,13 @@ void Liu13_ClothModel::globalStep(ParticleData& pd, Real h)
 
 void Liu13_ClothModel::vectorToPosition(ParticleData& pd)
 {
+	Eigen::VectorXd m_v = (m_X - m_XOld)/0.005;
 	for (long long i = 0; i < size; i++)
 	{
 		pd.getLastPosition(i) = pd.getOldPosition(i);
 		pd.getOldPosition(i) = pd.getPosition(i);
 		pd.getPosition(i) = Vector3r(m_X(3 * i), m_X(3 * i + 1), m_X(3 * i + 2));
+		//pd.getVelocity(i) = Vector3r(m_v(3 * i), m_v(3 * i + 1), m_v(3 * i + 2));
 	}
 }
 
@@ -446,22 +464,22 @@ void Liu13_ClothModel::fixOverSpring(ParticleData& pd, Real h2)
 			if (v1fix && v2fix) continue;
 			else if(!v1fix && !v2fix)
 			{
-				pd.getVelocity(v1) -= p12 / h2;
+				pd.getForce(v1) -= p12 / h2;
 				//m_X.segment(3 * v1, 3) = pd.getPosition(m_pindices[v1]);
 				//save.push_back(v1);
-				pd.getVelocity(v2) += p12 / h2;
+				pd.getForce(v2) += p12 / h2;
 				//m_X.segment(3 * v2, 3) = pd.getPosition(m_pindices[v2]);
 				//save.push_back(v2);
 			}
 			else if (v2fix)
 			{
-				pd.getVelocity(v1) -= 2 * p12 / h2;
+				pd.getForce(v1) -= 2 * p12 / h2;
 				//m_X.segment(3 * v1, 3) = pd.getPosition(m_pindices[v1]);
 				//save.push_back(v1);
 			}
 			else 
 			{
-				pd.getVelocity(v2) += 2 * p12 / h2;
+				pd.getForce(v2) += 2 * p12 / h2;
 				//m_X.segment(3 * v2, 3) = pd.getPosition(m_pindices[v2]);
 				//.push_back(v2);
 			}
@@ -493,6 +511,12 @@ void Liu13_ClothModel::collisionSphere(ParticleData& pd)
 		//m_XOld.segment(3 * i, 3) = m_X.segment(3 * i, 3);
 		m_X.segment(3 * i, 3) = pd.getPosition(i).cast<double>();
 	}
+}
+void Liu13_ClothModel::restart()
+{
+	getPositionVector(*m_pd);
+	m_XOld = m_X;
+	printf("restart\n");
 }
 //
 //void Liu13_ClothModel::fixedPointMovement(ParticleData& pd)

@@ -549,6 +549,7 @@ void buildModel()
 
 	// create static rigid body
 	string fileName = FileSystem::normalizePath(base->getDataPath() + "/models/cube.obj");
+	std::cout << fileName << std::endl;
 	IndexedFaceMesh mesh;
 	VertexData vd;
 	loadObj(fileName, vd, mesh, Vector3r::Ones());

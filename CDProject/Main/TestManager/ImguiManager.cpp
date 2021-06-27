@@ -462,18 +462,8 @@ void ImguiManager::createLiuMesh()
 	Liu13_ClothModel* tri;
 	
 	tri = (Liu13_ClothModel*)(model->getTriangleModels()[0]);
-	tri->addSprings();
-	tri->setParticleMass(pd);
-	
-	tri->setMassMatrix(pd);
-	tri->setLMatrix();
-	tri->setJMatrix();
-	tri->setRestLength(pd);
-	tri->setVectorSize();
-	tri->getPositionVector(pd);
-	tri->setMLMatrix(0.033);
+	tri->init(pd);
 	//
-
 	PBD::SimulationModel::TriangleModelVector& tm = model->getTriangleModels();
 	//PBD::DistanceFieldCollisionDetection& cd = *(PBD::DistanceFieldCollisionDetection*)PBD::Simulation::getCurrent()->getTimeStep()->getCollisionDetection();
 	for (unsigned int i = 0; i < tm.size(); i++)
@@ -1227,7 +1217,7 @@ void ImguiManager::addRigidbody(treetype tree)
 		break;
 	case torus:
 		n_rigidbody->initBody(1.0,
-			Vector3r(5.0, -1.5, 5.0),
+			Vector3r(6.0, -1.5, 5.0),
 			Quaternionr(1.0, 0.0, 0.0, 0.0),
 			vd, mesh,
 			Vector3r(2.0, 2.0, 2.0));

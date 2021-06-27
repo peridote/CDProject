@@ -25,6 +25,7 @@ class Liu13_ClothModel : public TriangleModel
 		typedef Edge Spring;
 
 	protected:
+		ParticleData* m_pd;
 		unsigned int ncol;
 		unsigned int nrow;
 		Real m_mass;
@@ -41,9 +42,10 @@ class Liu13_ClothModel : public TriangleModel
 		Eigen::SimplicialCholesky<Eigen::SparseMatrix<double>> solver;
 		std::set<unsigned int> m_fixed_points;
 
-		int size;
+		int size = 0;
 
 	public:
+		void init(ParticleData& pd);
 		void getPositionVector(ParticleData& pd);
 		void getMassMatrix(Eigen::MatrixXd& matrix);
 		void setMassMatrix(ParticleData& pd);
@@ -64,7 +66,7 @@ class Liu13_ClothModel : public TriangleModel
 		void setFixPoint(ParticleData& pd);
 		void fixOverSpring(ParticleData& pd, Real h2);
 		void collisionSphere(ParticleData& pd);
-
+		void restart();
 		void fixedPointMovement(ParticleData& pd);
 
 
